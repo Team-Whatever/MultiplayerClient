@@ -75,7 +75,7 @@ public class PlayerUnit : MonoBehaviour
             if( Input.GetKeyUp( KeyCode.Space ))
             {
                 NetworkMan.Instance.SendAction("fire", bulletSpawnerTransform );
-                //FireBullet();
+                FireBullet();
             }
 
             // mouse right drag
