@@ -4,26 +4,42 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+public enum PlayerCommand
+{
+    MoveForward,
+    MoveBackward,
+    MoveLeft,
+    MoveRight,
+    RotateLeft,
+    RotateRight,
+    LookUp,
+    LookDown,
+    FireBullet,
+};
+
 public class PlayerUnit : MonoBehaviour
 {
     public string id;
     
     public bool isLocalPlayer;
     public GameObject cameraSpot;
+    public GameObject modelObj;
     Material material;
 
     public float moveSpeed = 1.0f;
     public float angularSpeed = 60.0f;
 
-    public Transform revTransform;
-    public Transform delayedTransform;
+    // messages received from the server
+    Queue<PlayerCommand> commandQueue = new Queue<PlayerCommand>();
+    // messages to be sent to the server
+    Queue<PlayerCommand> messageQueue = new Queue<PlayerCommand>();
 
     /// <summary>
     /// projectile variables
     /// </summary>
     public Transform bulletSpawnerTransform;
     public Bullet bulletPrefab;
-    public float weaponCooldown = 0.5f;
+    public float weaponCooldown;
     public float cooldownTime;
 
     /// <summary>
@@ -31,11 +47,12 @@ public class PlayerUnit : MonoBehaviour
     /// </summary>
     public float currentHealth;
     public float maxHealth = 100;
-    public bool IsAlive { get { return currentHealth > 0; } }
+    bool IsAlive;
 
     /// <summary>
     /// UI features
     /// </summary>
+    public GameObject uiPanel;
     public TextMeshProUGUI clientIdText;
     public Slider healthBar;
 
@@ -48,6 +65,7 @@ public class PlayerUnit : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
+        IsAlive = true;
         healthBar.value = 1.0f;
     }
 
@@ -72,11 +90,6 @@ public class PlayerUnit : MonoBehaviour
             {
                 curTransform.position += curTransform.right * Time.deltaTime * moveSpeed;
             }
-            if( Input.GetKeyUp( KeyCode.Space ))
-            {
-                NetworkMan.Instance.SendAction("fire", bulletSpawnerTransform );
-                //FireBullet();
-            }
 
             // mouse right drag
             if( Input.GetMouseButton( 1 ) )
@@ -94,15 +107,73 @@ public class PlayerUnit : MonoBehaviour
                 transform.position = curTransform.position;
                 transform.rotation = curTransform.rotation;
             }
+
         }
         else
         {
-            clientIdText.transform.rotation = Camera.main.transform.rotation;
+            uiPanel.transform.rotation = Camera.main.transform.rotation;
+        }
+
+        if( Input.GetKeyDown( KeyCode.Space ) )
+        {
+            if( cooldownTime <= 0.0f )
+                SendCommand( PlayerCommand.FireBullet );
         }
 
         if( cooldownTime > 0.0f )
         {
             cooldownTime -= Time.fixedDeltaTime;
+        }
+
+        if( currentHealth <= 0 && IsAlive )
+        {
+            Die();
+        }
+        else if( commandQueue.Count > 0 )
+        {
+            ExecuteCommand( commandQueue.Dequeue() );
+        }
+    }
+
+    public void SendCommand( PlayerCommand command )
+    {
+        Debug.Log( "[ " + Time.time.ToString() + "] Send command : " + command.ToString() );
+        messageQueue.Enqueue( command );
+    }
+
+    public bool HasMessage()
+    {
+        return messageQueue.Count > 0;
+    }
+
+    public string PopMessage()
+    {
+        return messageQueue.Dequeue().ToString();
+    }
+
+    public void AddCommand( string commandStr )
+    {
+        PlayerCommand command;
+        if( System.Enum.TryParse( commandStr, out command ) )
+            AddCommand( command );
+    }
+
+    public void AddCommand( PlayerCommand command )
+    {
+        Debug.Log( "[" + Time.time.ToString() + "] receive command : " + command.ToString() );
+        commandQueue.Enqueue( command );
+    }
+
+    void ExecuteCommand( PlayerCommand command )
+    {
+        Debug.Log( "[ " + Time.time.ToString() + "] execute command : " + command.ToString() );
+        switch( command )
+        {
+            case PlayerCommand.FireBullet:
+                FireBullet();
+                break;
+            default:
+                break;
         }
     }
 
@@ -138,6 +209,7 @@ public class PlayerUnit : MonoBehaviour
 
     public void FireBullet()
     {
+        //Debug.Log( string.Format( "{0} : fire", id ) );
         if( cooldownTime <= 0.0f )
         {
             Bullet bullet = Instantiate( bulletPrefab, bulletSpawnerTransform.position, bulletSpawnerTransform.rotation );
@@ -145,7 +217,6 @@ public class PlayerUnit : MonoBehaviour
             bullet.Fire();
             cooldownTime = weaponCooldown; 
         }
-        //NetworkMan.Instance.SendAction("fire", bulletSpawnerTransform );
     }
 
     public void TakeDamage( float damage )
@@ -158,17 +229,12 @@ public class PlayerUnit : MonoBehaviour
     {
         currentHealth = health;
         healthBar.value = currentHealth / maxHealth;
-        if (currentHealth <= 0)
-        {
-            //StartCoroutine(Die());
-            Debug.Log("Player Die");
-        }
     }
 
-    IEnumerator Die()
+    void Die()
     {
-        gameObject.SetActive(false);
-        yield return new WaitForSeconds(1.0f);
-        //Destroy(gameObject);
+        Debug.Log( "Player Die : " + id );
+        IsAlive = false;
+        modelObj.SetActive(false);
     }
 }

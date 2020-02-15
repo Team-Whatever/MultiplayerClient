@@ -12,7 +12,6 @@ public class NetworkMan : MonoBehaviour
     Dictionary<string, PlayerUnit> playerUnits = new Dictionary<string, PlayerUnit>();
     List<Player> newPlayers = new List<Player>();
     List<Player> disconnectedPlayers = new List<Player>();
-    List<PlayerPacketData> currentPlayers;
 
     public UdpClient udp;
     public string serverIp = "3.219.69.41";
@@ -146,6 +145,7 @@ public class NetworkMan : MonoBehaviour
 
     public Message latestMessage;
     public GameState lastestGameState;
+    bool isGameStateProcessed = false;
 
     Dictionary<string, Player> prevPlayerData = new Dictionary<string, Player>();
     GameState previousGameState = null;
@@ -165,7 +165,7 @@ public class NetworkMan : MonoBehaviour
         
         // do what you'd like with `message` here:
         string returnData = Encoding.ASCII.GetString(message);
-        Debug.Log("Got this: " + returnData);
+        //Debug.Log("Got this: " + returnData);
         
         latestMessage = JsonUtility.FromJson<Message>(returnData);
         try{
@@ -189,6 +189,7 @@ public class NetworkMan : MonoBehaviour
 
                     latestTime = currentTime;
                     lastestGameState = JsonUtility.FromJson<GameState>( returnData );
+                    isGameStateProcessed = false;
                     break;
                 case commands.CLIENT_DROPPED:
                     NewPlayer droppedPlayer = JsonUtility.FromJson<NewPlayer>( returnData );
@@ -222,7 +223,7 @@ public class NetworkMan : MonoBehaviour
     }
 
     void UpdatePlayers(){
-        if( lastestGameState != null & lastestGameState.players.Length > 0 )
+        if( lastestGameState != null & isGameStateProcessed == false )
         {
             foreach( var player in lastestGameState.players )
             {
@@ -244,26 +245,27 @@ public class NetworkMan : MonoBehaviour
                         Quaternion nextRotation = player.rotation;
                         if( CanvasManager.Instance.reconciliation.isOn )
                         {
-
                         }
                         if( CanvasManager.Instance.interpolation.isOn && prevPlayerExist )
                         {
                             float t = ( Time.time - latestTime ) / ( latestTime - previousTime );
                             nextPos = Vector3.Lerp( prevPlayer.pos, player.pos, t );
                             nextRotation = Quaternion.Lerp( prevPlayer.rotation, player.rotation, t );
-                            Debug.Log( String.Format( "Interpolate {0} to {1} by {2}, next = {3}", prevPlayer.pos, player.pos, t, nextPos ) );
+                            //Debug.Log( String.Format( "Interpolate {0} to {1} by {2}, next = {3}", prevPlayer.pos, player.pos, t, nextPos ) );
                         }
 
                         playerUnits[player.id].transform.position = nextPos;
                         playerUnits[player.id].transform.rotation = nextRotation;
                         playerUnits[player.id].SetHealth(player.health);
                     }
-                    if( player.action == "fire" )
+                    if( player.action != null && player.action != "" )
                     {
-                        playerUnits[player.id].FireBullet();
+                        //Debug.Log( " " + player.id.ToString() + " ] " + player.action.ToString() );
+                        playerUnits[player.id].AddCommand( player.action );
                     }
                 }
             }
+            isGameStateProcessed = true;
         }
     }
 
@@ -284,30 +286,19 @@ public class NetworkMan : MonoBehaviour
     
     void HeartBeat(){
 
-        if( clientId != null && playerUnits[clientId].IsAlive )
+        if( clientId != null )
         {
             PlayerPacketData data = new PlayerPacketData();
             data.id = clientId;
             data.pos = playerUnits[clientId].transform.position;
             data.rotation = playerUnits[clientId].transform.rotation;
             data.health = playerUnits[clientId].currentHealth;
+            if( playerUnits[clientId].HasMessage() )
+                data.message = playerUnits[clientId].PopMessage();
             string messageData = JsonUtility.ToJson( data );
+
             Byte[] sendBytes = Encoding.ASCII.GetBytes(messageData);
             udp.Send( sendBytes, sendBytes.Length );
-        }
-    }
-
-    public void SendAction( string message, Transform clientTransform )
-    {
-        if (clientId != null )
-        {
-            PlayerPacketData data = new PlayerPacketData();
-            data.id = clientId;
-            data.message = message;
-            string messageData = JsonUtility.ToJson(data);
-
-            Byte[] sendBytes = Encoding.ASCII.GetBytes(messageData);
-            udp.Send(sendBytes, sendBytes.Length);
         }
     }
 
