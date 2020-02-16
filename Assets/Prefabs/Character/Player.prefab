@@ -299,7 +299,7 @@ MonoBehaviour:
     smoothTime: 18
     lockCursor: 1
   advancedSettings:
-    groundCheckDistance: 0.1
+    groundCheckDistance: 0.5
     stickToGroundHelperDistance: 0.6
     slowDownRate: 20
     airControl: 0
@@ -397,16 +397,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 124537568}
     m_Modifications:
-    - target: {fileID: 2337074158997199750, guid: ada2587319194f542957a8c2ae277cb9,
-        type: 3}
-      propertyPath: m_Name
-      value: Carbine
-      objectReference: {fileID: 0}
-    - target: {fileID: 2337074158997199750, guid: ada2587319194f542957a8c2ae277cb9,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 2337074158996965286, guid: ada2587319194f542957a8c2ae277cb9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -477,6 +467,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 2337074158997199750, guid: ada2587319194f542957a8c2ae277cb9,
+        type: 3}
+      propertyPath: m_Name
+      value: Carbine
+      objectReference: {fileID: 0}
+    - target: {fileID: 2337074158997199750, guid: ada2587319194f542957a8c2ae277cb9,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3320313403809709629, guid: ada2587319194f542957a8c2ae277cb9,
         type: 3}
       propertyPath: fpsController
@@ -507,16 +507,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 124537568}
     m_Modifications:
-    - target: {fileID: 2337074158997199750, guid: e4eb09a601f1e7f4ca714adcfa9c4ea4,
-        type: 3}
-      propertyPath: m_Name
-      value: Shotgun
-      objectReference: {fileID: 0}
-    - target: {fileID: 2337074158997199750, guid: e4eb09a601f1e7f4ca714adcfa9c4ea4,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2337074158996965286, guid: e4eb09a601f1e7f4ca714adcfa9c4ea4,
         type: 3}
       propertyPath: m_RootOrder
@@ -535,6 +525,16 @@ PrefabInstance:
     - target: {fileID: 2337074158996965286, guid: e4eb09a601f1e7f4ca714adcfa9c4ea4,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2337074158997199750, guid: e4eb09a601f1e7f4ca714adcfa9c4ea4,
+        type: 3}
+      propertyPath: m_Name
+      value: Shotgun
+      objectReference: {fileID: 0}
+    - target: {fileID: 2337074158997199750, guid: e4eb09a601f1e7f4ca714adcfa9c4ea4,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3666639231895742267, guid: e4eb09a601f1e7f4ca714adcfa9c4ea4,
@@ -562,16 +562,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 124537568}
     m_Modifications:
-    - target: {fileID: 2337074158997199750, guid: 9fd0e208bc6a51a45802d3c65d0392ac,
-        type: 3}
-      propertyPath: m_Name
-      value: Pistol
-      objectReference: {fileID: 0}
-    - target: {fileID: 2337074158997199750, guid: 9fd0e208bc6a51a45802d3c65d0392ac,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2337074158996965286, guid: 9fd0e208bc6a51a45802d3c65d0392ac,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -625,6 +615,16 @@ PrefabInstance:
     - target: {fileID: 2337074158996965286, guid: 9fd0e208bc6a51a45802d3c65d0392ac,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2337074158997199750, guid: 9fd0e208bc6a51a45802d3c65d0392ac,
+        type: 3}
+      propertyPath: m_Name
+      value: Pistol
+      objectReference: {fileID: 0}
+    - target: {fileID: 2337074158997199750, guid: 9fd0e208bc6a51a45802d3c65d0392ac,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3666639231895742267, guid: 9fd0e208bc6a51a45802d3c65d0392ac,
