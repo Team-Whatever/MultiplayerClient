@@ -6,12 +6,28 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 
-public class NetworkMan : MonoBehaviour
+[Serializable]
+public class PlayerInfoData
+{
+    public string id;
+    public Color color;
+    
+    public Vector3 pos;
+    public Quaternion rotation;
+
+    public float health;
+
+    public string command;
+}
+
+
+public class NetworkManager : Singleton<NetworkManager>
 {
     public PlayerUnit playerPrefab;
     Dictionary<string, PlayerUnit> playerUnits = new Dictionary<string, PlayerUnit>();
-    List<Player> newPlayers = new List<Player>();
-    List<Player> disconnectedPlayers = new List<Player>();
+
+    List<PlayerReceivedData> newPlayers = new List<PlayerReceivedData>();
+    List<PlayerReceivedData> disconnectedPlayers = new List<PlayerReceivedData>();
 
     public UdpClient udp;
     public string serverIp = "3.219.69.41";
@@ -21,14 +37,8 @@ public class NetworkMan : MonoBehaviour
     public float numUpdatePerSecond = 10.0f;
     public float estimatedLag = 200.0f; // in mili seconds
 
-    public static NetworkMan Instance { get; private set; } = null;
-
     private void Awake()
     {
-        if( Instance != null && Instance != this )
-            Destroy( gameObject );
-        else
-            Instance = this;
     }
 
     // Start is called before the first frame update
@@ -111,43 +121,44 @@ public class NetworkMan : MonoBehaviour
     }
 
     [Serializable]
-    public class Player{
+    public class PlayerReceivedData {
         public string id;
         public receivedColor color;
         public receivedPos pos;
         public receivedRotation rotation;
         public float health;
-        public string action;
-    }
+        public string command;
 
-    [Serializable]
-    public class PlayerPacketData
-    {
-        public string id;
-        public string message;
-        public Vector3 pos;
-        public Quaternion rotation;
 
-        public float health;
+        public static implicit operator PlayerInfoData( PlayerReceivedData data )
+        {
+            PlayerInfoData info = new PlayerInfoData();
+            info.id = data.id;
+            info.color = data.color;
+            info.pos = data.pos;
+            info.rotation = data.rotation;
+            info.health = data.health;
+            info.command = data.command;
+            return info;
+        }
     }
 
     [Serializable]
     public class NewPlayer{
         public commands cmd;
-        public Player player;
+        public PlayerReceivedData player;
     }
 
     [Serializable]
     public class GameState{
         public commands cmd;
-        public Player[] players;
+        public PlayerReceivedData[] players;
     }
 
     public Message latestMessage;
     public GameState lastestGameState;
     bool isGameStateProcessed = false;
 
-    Dictionary<string, Player> prevPlayerData = new Dictionary<string, Player>();
     GameState previousGameState = null;
     float previousTime = 0;
     float latestTime = 0;
@@ -174,6 +185,7 @@ public class NetworkMan : MonoBehaviour
                     {
                         NewPlayer newPlayer = JsonUtility.FromJson<NewPlayer>( returnData );
                         clientId = newPlayer.player.id;
+                        //GameplayManager.Instance.localPlayerId = clientId;
                         newPlayers.Add( newPlayer.player );
                         break;
                     }
@@ -213,10 +225,14 @@ public class NetworkMan : MonoBehaviour
         {
             foreach( var newPlayer in newPlayers )
             {
+                Vector3 pos = new Vector3( newPlayer.pos.x, newPlayer.pos.y, newPlayer.pos.z );
+
                 PlayerUnit player = Instantiate( playerPrefab );
-                player.transform.position = new Vector3( newPlayer.pos.x, newPlayer.pos.y, newPlayer.pos.z );
+                player.transform.position = pos;
                 player.SetId( newPlayer.id, clientId == newPlayer.id );
                 playerUnits.Add( newPlayer.id, player );
+
+                //GameplayManager.Instance.SpawnPlayer( newPlayer.id, pos, clientId == newPlayer.id );
             }
             newPlayers.Clear();
         }
@@ -227,10 +243,11 @@ public class NetworkMan : MonoBehaviour
         {
             foreach( var player in lastestGameState.players )
             {
+                
                 if( playerUnits.ContainsKey( player.id ) )
                 {
                     bool prevPlayerExist = false;
-                    Player prevPlayer = null;
+                    PlayerReceivedData prevPlayer = null;
                     if( previousGameState != null )
                     {
                         prevPlayerExist = Array.Exists( previousGameState.players, p => p.id == player.id );
@@ -258,10 +275,10 @@ public class NetworkMan : MonoBehaviour
                         playerUnits[player.id].transform.rotation = nextRotation;
                         playerUnits[player.id].SetHealth(player.health);
                     }
-                    if( player.action != null && player.action != "" )
+                    if( player.command != null && player.command != "" )
                     {
                         //Debug.Log( " " + player.id.ToString() + " ] " + player.action.ToString() );
-                        playerUnits[player.id].AddCommand( player.action );
+                        playerUnits[player.id].AddCommand( player.command );
                     }
                 }
             }
@@ -274,6 +291,7 @@ public class NetworkMan : MonoBehaviour
         {
             foreach( var droppedPlayer in disconnectedPlayers )
             {
+                //GameplayManager.Instance.DisconnectPlayer( droppedPlayer.id );
                 if( playerUnits.ContainsKey( droppedPlayer.id ) )
                 {
                     Destroy( playerUnits[droppedPlayer.id].gameObject );
@@ -288,13 +306,13 @@ public class NetworkMan : MonoBehaviour
 
         if( clientId != null )
         {
-            PlayerPacketData data = new PlayerPacketData();
+            PlayerInfoData data = new PlayerInfoData();
             data.id = clientId;
             data.pos = playerUnits[clientId].transform.position;
             data.rotation = playerUnits[clientId].transform.rotation;
             data.health = playerUnits[clientId].currentHealth;
             if( playerUnits[clientId].HasMessage() )
-                data.message = playerUnits[clientId].PopMessage();
+                data.command = playerUnits[clientId].PopMessage();
             string messageData = JsonUtility.ToJson( data );
 
             Byte[] sendBytes = Encoding.ASCII.GetBytes(messageData);

@@ -100,7 +100,7 @@ public class PlayerUnit : MonoBehaviour
 
             if( CanvasManager.Instance.prediction.isOn )
             {
-                StartCoroutine( UpdateTransform( curTransform, NetworkMan.Instance.estimatedLag ) );
+                StartCoroutine( UpdateTransform( curTransform, NetworkManager.Instance.estimatedLag ) );
             }
             else
             {
