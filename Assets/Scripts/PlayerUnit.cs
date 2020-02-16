@@ -64,9 +64,15 @@ public class PlayerUnit : MonoBehaviour
 
     private void Start()
     {
+        Reset();
+    }
+
+    public void Reset()
+    {
         currentHealth = maxHealth;
         IsAlive = true;
         healthBar.value = 1.0f;
+        modelObj.SetActive( true );
     }
 
     public void FixedUpdate()
@@ -74,28 +80,31 @@ public class PlayerUnit : MonoBehaviour
         if( isLocalPlayer )
         {
             Transform curTransform = transform;
-            if( Input.GetKey( KeyCode.W ) )
+            if( IsAlive )
             {
-                curTransform.position += curTransform.forward * Time.deltaTime * moveSpeed;
-            }
-            if( Input.GetKey( KeyCode.S ) )
-            {
-                curTransform.position -= curTransform.forward * Time.deltaTime * moveSpeed;
-            }
-            if( Input.GetKey( KeyCode.A ) )
-            {
-                curTransform.position -= curTransform.right * Time.deltaTime * moveSpeed;
-            }
-            if( Input.GetKey( KeyCode.D ) )
-            {
-                curTransform.position += curTransform.right * Time.deltaTime * moveSpeed;
-            }
+                if( Input.GetKey( KeyCode.W ) )
+                {
+                    curTransform.position += curTransform.forward * Time.deltaTime * moveSpeed;
+                }
+                if( Input.GetKey( KeyCode.S ) )
+                {
+                    curTransform.position -= curTransform.forward * Time.deltaTime * moveSpeed;
+                }
+                if( Input.GetKey( KeyCode.A ) )
+                {
+                    curTransform.position -= curTransform.right * Time.deltaTime * moveSpeed;
+                }
+                if( Input.GetKey( KeyCode.D ) )
+                {
+                    curTransform.position += curTransform.right * Time.deltaTime * moveSpeed;
+                }
 
-            // mouse right drag
-            if( Input.GetMouseButton( 1 ) )
-            {
-                float rotation = Input.GetAxis( "Mouse X" ) * angularSpeed;
-                curTransform.Rotate( Vector3.up, rotation );
+                // mouse right drag
+                if( Input.GetMouseButton( 1 ) )
+                {
+                    float rotation = Input.GetAxis( "Mouse X" ) * angularSpeed;
+                    curTransform.Rotate( Vector3.up, rotation );
+                }
             }
 
             if( CanvasManager.Instance.prediction.isOn )
@@ -236,5 +245,10 @@ public class PlayerUnit : MonoBehaviour
         Debug.Log( "Player Die : " + id );
         IsAlive = false;
         modelObj.SetActive(false);
+
+        if( isLocalPlayer )
+        {
+            CanvasManager.Instance.ShowDeadUI();
+        }
     }
 }

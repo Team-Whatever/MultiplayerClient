@@ -8,6 +8,7 @@ public class GameplayManager : Singleton<GameplayManager>
     public string localPlayerId;
     public PlayerUnit playerPrefab;
     Dictionary<string, PlayerUnit> playerUnits = new Dictionary<string, PlayerUnit>();
+    Dictionary<string, PlayerInfoData> prevPlayerData = new Dictionary<string, PlayerInfoData>();
 
     // Start is called before the first frame update
     void Start()
@@ -19,6 +20,13 @@ public class GameplayManager : Singleton<GameplayManager>
     void Update()
     {
         
+    }
+
+    public PlayerUnit GetLocalPlayer()
+    {
+        if( playerUnits.ContainsKey( localPlayerId ) )
+            return playerUnits[localPlayerId];
+        return null;
     }
 
     public void SpawnPlayer( string playerId, Vector3 pos, bool isLocalPlayer )
@@ -33,6 +41,41 @@ public class GameplayManager : Singleton<GameplayManager>
             player.transform.position = pos;
             player.SetId( playerId, isLocalPlayer );
             playerUnits.Add( playerId, player );
+
+            if( isLocalPlayer )
+                localPlayerId = playerId;
+        }
+    }
+
+    public void UpdatePlayer( PlayerInfoData playerData, PlayerInfoData prevPlayerData, float delta )
+    {
+        if( playerUnits.ContainsKey( playerData.id ) )
+        {
+            playerUnits[playerData.id].SetColor( playerData.color );
+            if( playerData.id != localPlayerId )
+            {
+                Vector3 nextPos = playerData.pos;
+                Quaternion nextRotation = playerData.rotation;
+                if( CanvasManager.Instance.reconciliation.isOn )
+                {
+                    // To be implemented
+                }
+                if( CanvasManager.Instance.interpolation.isOn && prevPlayerData != null )
+                {
+                    nextPos = Vector3.Lerp( prevPlayerData.pos, playerData.pos, delta );
+                    nextRotation = Quaternion.Lerp( prevPlayerData.rotation, playerData.rotation, delta );
+                }
+
+                playerUnits[playerData.id].transform.position = nextPos;
+                playerUnits[playerData.id].transform.rotation = nextRotation;
+                playerUnits[playerData.id].SetHealth( playerData.health );
+            }
+
+            if( playerData.command != null && playerData.command != "" )
+            {
+                //Debug.Log( " " + player.id.ToString() + " ] " + player.action.ToString() );
+                playerUnits[playerData.id].AddCommand( playerData.command );
+            }
         }
     }
 
@@ -54,6 +97,10 @@ public class GameplayManager : Singleton<GameplayManager>
 
     public void RevivePlayer()
     {
-
+        PlayerUnit localPlayer = GetLocalPlayer();
+        if( localPlayer != null )
+        {
+            localPlayer.Reset();
+        }
     }
 }

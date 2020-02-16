@@ -23,9 +23,6 @@ public class PlayerInfoData
 
 public class NetworkManager : Singleton<NetworkManager>
 {
-    public PlayerUnit playerPrefab;
-    Dictionary<string, PlayerUnit> playerUnits = new Dictionary<string, PlayerUnit>();
-
     List<PlayerReceivedData> newPlayers = new List<PlayerReceivedData>();
     List<PlayerReceivedData> disconnectedPlayers = new List<PlayerReceivedData>();
 
@@ -185,7 +182,6 @@ public class NetworkManager : Singleton<NetworkManager>
                     {
                         NewPlayer newPlayer = JsonUtility.FromJson<NewPlayer>( returnData );
                         clientId = newPlayer.player.id;
-                        //GameplayManager.Instance.localPlayerId = clientId;
                         newPlayers.Add( newPlayer.player );
                         break;
                     }
@@ -227,12 +223,12 @@ public class NetworkManager : Singleton<NetworkManager>
             {
                 Vector3 pos = new Vector3( newPlayer.pos.x, newPlayer.pos.y, newPlayer.pos.z );
 
-                PlayerUnit player = Instantiate( playerPrefab );
-                player.transform.position = pos;
-                player.SetId( newPlayer.id, clientId == newPlayer.id );
-                playerUnits.Add( newPlayer.id, player );
+                //PlayerUnit player = Instantiate( playerPrefab );
+                //player.transform.position = pos;
+                //player.SetId( newPlayer.id, clientId == newPlayer.id );
+                //playerUnits.Add( newPlayer.id, player );
 
-                //GameplayManager.Instance.SpawnPlayer( newPlayer.id, pos, clientId == newPlayer.id );
+                GameplayManager.Instance.SpawnPlayer( newPlayer.id, pos, clientId == newPlayer.id );
             }
             newPlayers.Clear();
         }
@@ -243,44 +239,19 @@ public class NetworkManager : Singleton<NetworkManager>
         {
             foreach( var player in lastestGameState.players )
             {
-                
-                if( playerUnits.ContainsKey( player.id ) )
+                bool prevPlayerExist = false;
+                PlayerReceivedData prevPlayer = null;
+                float delta = 0.0f;
+                if( previousGameState != null )
                 {
-                    bool prevPlayerExist = false;
-                    PlayerReceivedData prevPlayer = null;
-                    if( previousGameState != null )
-                    {
-                        prevPlayerExist = Array.Exists( previousGameState.players, p => p.id == player.id );
-                        prevPlayer = Array.Find( previousGameState.players, p => p.id == player.id );
-                    }
-
-                    playerUnits[player.id].SetColor( player.color );
-
-                    if( player.id != clientId )
-                    {
-                        Vector3 nextPos = player.pos;
-                        Quaternion nextRotation = player.rotation;
-                        if( CanvasManager.Instance.reconciliation.isOn )
-                        {
-                        }
-                        if( CanvasManager.Instance.interpolation.isOn && prevPlayerExist )
-                        {
-                            float t = ( Time.time - latestTime ) / ( latestTime - previousTime );
-                            nextPos = Vector3.Lerp( prevPlayer.pos, player.pos, t );
-                            nextRotation = Quaternion.Lerp( prevPlayer.rotation, player.rotation, t );
-                            //Debug.Log( String.Format( "Interpolate {0} to {1} by {2}, next = {3}", prevPlayer.pos, player.pos, t, nextPos ) );
-                        }
-
-                        playerUnits[player.id].transform.position = nextPos;
-                        playerUnits[player.id].transform.rotation = nextRotation;
-                        playerUnits[player.id].SetHealth(player.health);
-                    }
-                    if( player.command != null && player.command != "" )
-                    {
-                        //Debug.Log( " " + player.id.ToString() + " ] " + player.action.ToString() );
-                        playerUnits[player.id].AddCommand( player.command );
-                    }
+                    prevPlayerExist = Array.Exists( previousGameState.players, p => p.id == player.id );
+                    prevPlayer = Array.Find( previousGameState.players, p => p.id == player.id );
+                    delta = ( Time.time - latestTime ) / ( latestTime - previousTime );
                 }
+                if( prevPlayerExist )
+                    GameplayManager.Instance.UpdatePlayer( player, prevPlayer, delta );
+                else
+                    GameplayManager.Instance.UpdatePlayer( player, null, delta );
             }
             isGameStateProcessed = true;
         }
@@ -291,12 +262,7 @@ public class NetworkManager : Singleton<NetworkManager>
         {
             foreach( var droppedPlayer in disconnectedPlayers )
             {
-                //GameplayManager.Instance.DisconnectPlayer( droppedPlayer.id );
-                if( playerUnits.ContainsKey( droppedPlayer.id ) )
-                {
-                    Destroy( playerUnits[droppedPlayer.id].gameObject );
-                    playerUnits.Remove( droppedPlayer.id );
-                }
+                GameplayManager.Instance.DisconnectPlayer( droppedPlayer.id );
             }
             disconnectedPlayers.Clear();
         }
@@ -306,13 +272,14 @@ public class NetworkManager : Singleton<NetworkManager>
 
         if( clientId != null )
         {
+            PlayerUnit localPlayer = GameplayManager.Instance.GetLocalPlayer();
             PlayerInfoData data = new PlayerInfoData();
             data.id = clientId;
-            data.pos = playerUnits[clientId].transform.position;
-            data.rotation = playerUnits[clientId].transform.rotation;
-            data.health = playerUnits[clientId].currentHealth;
-            if( playerUnits[clientId].HasMessage() )
-                data.command = playerUnits[clientId].PopMessage();
+            data.pos = localPlayer.transform.position;
+            data.rotation = localPlayer.transform.rotation;
+            data.health = localPlayer.currentHealth;
+            if( localPlayer.HasMessage() )
+                data.command = localPlayer.PopMessage();
             string messageData = JsonUtility.ToJson( data );
 
             Byte[] sendBytes = Encoding.ASCII.GetBytes(messageData);
