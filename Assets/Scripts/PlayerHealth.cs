@@ -25,5 +25,10 @@ public class PlayerHealth : MonoBehaviour
     public void ReceiveHealth(int health)
     {
         currentHealth += health;
+
+        if (currentHealth > maxHealth)
+            currentHealth = maxHealth;
     }
+
+    public float GetHealth() { return currentHealth; }
 }
