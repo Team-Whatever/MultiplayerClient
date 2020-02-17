@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AmmoPickup : MonoBehaviour
+public class HealthPickup : MonoBehaviour
 {
-    [SerializeField] int ammoAmount = 5;
-    [SerializeField] AmmoType ammoType;
+    [SerializeField] int healthAmount = 5;
     [SerializeField] int respawnTimer = 10;
 
     private void OnTriggerEnter(Collider collider)
     {
         if (collider.gameObject.tag == "Player")
         {
-            FindObjectOfType<Ammo>().IncreaseCurrentAmmo(ammoType, ammoAmount);
+            FindObjectOfType<PlayerHealth>().ReceiveHealth(healthAmount);
             StartCoroutine(RespawnTimer());
         }
     }
@@ -20,6 +19,7 @@ public class AmmoPickup : MonoBehaviour
     private IEnumerator RespawnTimer()
     {
         transform.GetChild(0).gameObject.SetActive(false);
+        transform.GetChild(1).gameObject.SetActive(false);
         gameObject.GetComponent<SphereCollider>().enabled = false;
         float timer = respawnTimer;
         while (timer >= 0)
@@ -28,6 +28,7 @@ public class AmmoPickup : MonoBehaviour
             yield return null;
         }
         transform.GetChild(0).gameObject.SetActive(true);
+        transform.GetChild(1).gameObject.SetActive(true);
         gameObject.GetComponent<SphereCollider>().enabled = true;
     }
 }

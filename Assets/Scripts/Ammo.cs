@@ -25,7 +25,6 @@ public class Ammo : MonoBehaviour
 
     public void ReduceCurrentAmmoCount(AmmoType ammoType)
     {
-
         GetAmmoSlot(ammoType).ammoAmount--;
     }
 
