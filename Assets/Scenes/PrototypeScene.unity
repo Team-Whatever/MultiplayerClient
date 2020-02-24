@@ -10622,6 +10622,7 @@ GameObject:
   - component: {fileID: 1197919398}
   - component: {fileID: 1197919397}
   - component: {fileID: 1197919396}
+  - component: {fileID: 1197919399}
   m_Layer: 0
   m_Name: GameControllers
   m_TagString: Untagged
@@ -10680,6 +10681,34 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1197919399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1197919395}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a217f5f1fa1291242ad9b1fa3f0c1695, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerId: 
+  localPlayer: {fileID: 0}
+  isLocalPlayer: 0
+  cameraSpot: {fileID: 0}
+  modelObj: {fileID: 0}
+  moveSpeed: 1
+  angularSpeed: 60
+  bulletSpawnerTransform: {fileID: 0}
+  bulletPrefab: {fileID: 0}
+  weaponCooldown: 0
+  cooldownTime: 0
+  currentHealth: 100
+  maxHealth: 100
+  uiPanel: {fileID: 0}
+  clientIdText: {fileID: 0}
+  healthBar: {fileID: 0}
 --- !u!1001 &1208239923
 PrefabInstance:
   m_ObjectHideFlags: 0

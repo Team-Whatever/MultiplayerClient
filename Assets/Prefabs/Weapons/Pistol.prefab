@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1937479438710752979
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4460387036334261651}
+  m_Layer: 0
+  m_Name: BulletSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4460387036334261651
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1937479438710752979}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0.2263, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 2337074158996965286}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &2337074158997199744
 GameObject:
   m_ObjectHideFlags: 0
@@ -274,6 +304,7 @@ Transform:
   - {fileID: 2337074158996965288}
   - {fileID: 3760781081078919883}
   - {fileID: 3155622490941754485}
+  - {fileID: 4460387036334261651}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: -90, z: 0}
@@ -336,15 +367,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6f011bcab2eb6b4aaa03b3479029f75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  attackRange: 0
+  attackDamage: 0
+  damageMultiplier: 1
+  criticalChance: 0
+  criticalMultiplier: 1
+  attackCooldown: 0
+  isBeganAttack: 0
+  owner: {fileID: 0}
   FPCamera: {fileID: 0}
-  range: 20
-  weaponDamage: 7
-  weaponCooldown: 0.25
-  muzzleEffect: {fileID: 3155622490941754484}
-  hitEffect: {fileID: 6081592097569473915, guid: fe4f65c74b9634a469d889537987fb12,
-    type: 3}
   ammoSlot: {fileID: 0}
   ammoType: 0
+  bulletPrefab: {fileID: 8197819206853528537, guid: 828c431972d304898a9e75c930117334,
+    type: 3}
+  bulletSpeed: 0
+  bulletSpawnPoint: {fileID: 4460387036334261651}
+  attackParticle: {fileID: 0}
+  muzzleEffect: {fileID: 3155622490941754484}
 --- !u!1 &2337074158997199752
 GameObject:
   m_ObjectHideFlags: 0

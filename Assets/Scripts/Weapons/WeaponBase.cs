@@ -7,21 +7,12 @@ public abstract class WeaponBase : MonoBehaviour
     public float attackRange;
     public float attackDamage;
     public float damageMultiplier = 1.0f;
-    private float damageSpread;
+    protected float damageSpread;
 
     public float criticalChance;
     public float criticalMultiplier = 1.0f;
     
     public float attackCooldown;
-
-    /// <summary>
-    /// Bullet Properties
-    /// </summary>
-    public Bullet bulletPrefab;
-    public float bulletSpeed;
-    public Transform bulletSpawnPoint;
-    //public float angleOfSpreadingInFire;   // AI can have variation on firing angle.
-    public GameObject attackParticle;
 
 
     // HACK : early instantiation may cause CanAttack() to false.
@@ -50,36 +41,7 @@ public abstract class WeaponBase : MonoBehaviour
         return false;
     }
 
-    public virtual void OnBeginAttack()
-    {
-    }
-
-    public virtual void OnFire()
-    {
-        if( CanAttack() )
-        {
-            FireBullet();
-            lastAttackedTime = Time.time;
-        }
-    }
-
-    public virtual void OnEndAttack()
-    {
-        owner.ChangeState( UnitState.Idle );
-    }
-
-    void FireBullet()
-    {
-        Bullet bullet = Instantiate( bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation );
-        float damage = attackDamage * damageMultiplier + Random.Range( -damageSpread, damageSpread );
-        bullet.Fire( owner.teamId, damage, bulletSpeed, criticalChance * criticalMultiplier );
-
-        if( attackParticle != null )
-        {
-            GameObject particle = Instantiate( attackParticle, bulletSpawnPoint.position, bulletSpawnPoint.rotation );
-            Destroy( particle, 2.0f );
-        }
-
-    }
-
+    public abstract void OnBeginAttack();
+    public abstract void OnFire();
+    public abstract void OnEndAttack();
 }

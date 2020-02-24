@@ -7,6 +7,7 @@ using UnityEngine.Events;
 public enum UnitState
 {
     Idle,
+    Move,
     Wander,
     Chase,
     Attack,
@@ -46,9 +47,9 @@ public class UnitBase : StateMachine
     /// <summary>
     /// Identification
     /// </summary>
-    public int unitId;
-    public int teamId;
-    public bool isLocalPlayer;
+    [HideInInspector] public int unitId;
+    [HideInInspector] public int teamId;
+    [HideInInspector] public bool isLocalPlayer;
 
     /// <summary>
     /// Weapon

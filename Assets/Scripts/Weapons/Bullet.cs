@@ -7,6 +7,7 @@ public class Bullet : MonoBehaviour
     public int teamId;
     public float damage;
     public float ciriticalChance;
+    [SerializeField] GameObject hitEffect;
 
     private void OnTriggerEnter( Collider other )
     {
@@ -24,9 +25,19 @@ public class Bullet : MonoBehaviour
             if( targetUnit != null && teamId != targetUnit.teamId )
             {
                 targetUnit.TakeDamage( damage );
+
+                // TODO : change this to OnCollisionEnter to know what's the contact point
+                // turn off trigger event and and rigid body
+
                 Destroy( gameObject );
             }
         }
+    }
+
+    private void CreateHitImpact( RaycastHit hit )
+    {
+        GameObject hitEffectSpawn = Instantiate( hitEffect, hit.point, Quaternion.LookRotation( hit.normal ) );
+        Destroy( hitEffectSpawn, 0.2f );
     }
 
     public void Fire( int teamId, float damage, float speed, float criticalChance )
