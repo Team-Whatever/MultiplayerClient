@@ -17,11 +17,12 @@ public enum PlayerCommand
     FireBullet,
 };
 
-public class PlayerUnit : MonoBehaviour
+public class PlayerController : Singleton<PlayerController>
 {
-    public string id;
-    
+    public string playerId;
+    public UnitBase localPlayer;
     public bool isLocalPlayer;
+    
     public GameObject cameraSpot;
     public GameObject modelObj;
     Material material;
@@ -188,10 +189,10 @@ public class PlayerUnit : MonoBehaviour
 
     public void SetId( string clientId, bool isLocal )
     {
-        id = clientId;
+        playerId = clientId;
         if( clientIdText != null )
         {
-            clientIdText.text = id.Split( new char[] { '(', ',', ')' } )[2];
+            clientIdText.text = playerId.Split( new char[] { '(', ',', ')' } )[2];
             clientIdText.color = isLocal ? Color.red : Color.gray;
         }
 
@@ -218,14 +219,14 @@ public class PlayerUnit : MonoBehaviour
 
     public void FireBullet()
     {
-        //Debug.Log( string.Format( "{0} : fire", id ) );
-        if( cooldownTime <= 0.0f )
-        {
-            Bullet bullet = Instantiate( bulletPrefab, bulletSpawnerTransform.position, bulletSpawnerTransform.rotation );
-            bullet.ownerId = id;
-            bullet.Fire();
-            cooldownTime = weaponCooldown; 
-        }
+        ////Debug.Log( string.Format( "{0} : fire", id ) );
+        //if( cooldownTime <= 0.0f )
+        //{
+        //    Bullet bullet = Instantiate( bulletPrefab, bulletSpawnerTransform.position, bulletSpawnerTransform.rotation );
+        //    bullet.ownerId = id;
+        //    bullet.Fire();
+        //    cooldownTime = weaponCooldown; 
+        //}
     }
 
     public void TakeDamage( float damage )
@@ -242,7 +243,7 @@ public class PlayerUnit : MonoBehaviour
 
     void Die()
     {
-        Debug.Log( "Player Die : " + id );
+        Debug.Log( "Player Die : " + playerId );
         IsAlive = false;
         modelObj.SetActive(false);
 

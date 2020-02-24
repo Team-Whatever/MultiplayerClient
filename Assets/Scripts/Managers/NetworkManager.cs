@@ -223,7 +223,7 @@ public class NetworkManager : Singleton<NetworkManager>
             {
                 Vector3 pos = new Vector3( newPlayer.pos.x, newPlayer.pos.y, newPlayer.pos.z );
 
-                //PlayerUnit player = Instantiate( playerPrefab );
+                //PlayerController player = Instantiate( playerPrefab );
                 //player.transform.position = pos;
                 //player.SetId( newPlayer.id, clientId == newPlayer.id );
                 //playerUnits.Add( newPlayer.id, player );
@@ -272,7 +272,7 @@ public class NetworkManager : Singleton<NetworkManager>
 
         if( clientId != null )
         {
-            PlayerUnit localPlayer = GameplayManager.Instance.GetLocalPlayer();
+            PlayerController localPlayer = GameplayManager.Instance.GetLocalPlayer();
             PlayerInfoData data = new PlayerInfoData();
             data.id = clientId;
             data.pos = localPlayer.transform.position;

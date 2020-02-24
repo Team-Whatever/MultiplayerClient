@@ -4,17 +4,24 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    public string ownerId;
-    public float speed = 100;
-    public float damage = 10;
+    public int teamId;
+    public float damage;
+    public float ciriticalChance;
 
     private void OnTriggerEnter( Collider other )
     {
         if( other.transform.tag == "Player" )
         {
-            PlayerUnit targetUnit = other.GetComponent<PlayerUnit>();
-            // take a damage only if the own client gets hit
-            if( targetUnit != null && ownerId != targetUnit.id )
+            UnitBase targetUnit = other.GetComponent<UnitBase>();
+            if( targetUnit == null )
+                return;
+
+            // HACK : until we get server-side physics
+            // each client determines the damage it self
+            if( !targetUnit.isLocalPlayer )
+                return;
+
+            if( targetUnit != null && teamId != targetUnit.teamId )
             {
                 targetUnit.TakeDamage( damage );
                 Destroy( gameObject );
@@ -22,8 +29,11 @@ public class Bullet : MonoBehaviour
         }
     }
 
-    public void Fire()
+    public void Fire( int teamId, float damage, float speed, float criticalChance )
     {
+        this.teamId = teamId;
+        this.damage = damage;
+        this.ciriticalChance = criticalChance;
         GetComponent<Rigidbody>().AddForce( transform.forward * speed, ForceMode.Impulse );
         Destroy(gameObject, 5.0f);
     }

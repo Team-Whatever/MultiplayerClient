@@ -6,8 +6,8 @@ public class GameplayManager : Singleton<GameplayManager>
 {
     // the player(owner) of this client
     public string localPlayerId;
-    public PlayerUnit playerPrefab;
-    Dictionary<string, PlayerUnit> playerUnits = new Dictionary<string, PlayerUnit>();
+    public PlayerController playerPrefab;
+    Dictionary<string, PlayerController> playerUnits = new Dictionary<string, PlayerController>();
     Dictionary<string, PlayerInfoData> prevPlayerData = new Dictionary<string, PlayerInfoData>();
 
     // Start is called before the first frame update
@@ -22,7 +22,7 @@ public class GameplayManager : Singleton<GameplayManager>
         
     }
 
-    public PlayerUnit GetLocalPlayer()
+    public PlayerController GetLocalPlayer()
     {
         if( playerUnits.ContainsKey( localPlayerId ) )
             return playerUnits[localPlayerId];
@@ -37,7 +37,7 @@ public class GameplayManager : Singleton<GameplayManager>
         }
         else
         {
-            PlayerUnit player = Instantiate( playerPrefab );
+            PlayerController player = Instantiate( playerPrefab );
             player.transform.position = pos;
             player.SetId( playerId, isLocalPlayer );
             playerUnits.Add( playerId, player );
@@ -51,7 +51,6 @@ public class GameplayManager : Singleton<GameplayManager>
     {
         if( playerUnits.ContainsKey( playerData.id ) )
         {
-            playerUnits[playerData.id].SetColor( playerData.color );
             if( playerData.id != localPlayerId )
             {
                 Vector3 nextPos = playerData.pos;
@@ -97,7 +96,7 @@ public class GameplayManager : Singleton<GameplayManager>
 
     public void RevivePlayer()
     {
-        PlayerUnit localPlayer = GetLocalPlayer();
+        PlayerController localPlayer = GetLocalPlayer();
         if( localPlayer != null )
         {
             localPlayer.Reset();
