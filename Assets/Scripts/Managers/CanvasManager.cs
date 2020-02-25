@@ -41,6 +41,6 @@ public class CanvasManager : Singleton<CanvasManager>
     public void OnReviveButton()
     {
         deadUI.SetActive( false );
-        GameplayManager.Instance.RevivePlayer();
+        PlayerController.Instance.RevivePlayer();
     }
 }

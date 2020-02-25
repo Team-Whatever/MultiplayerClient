@@ -6,8 +6,8 @@ public class GameplayManager : Singleton<GameplayManager>
 {
     // the player(owner) of this client
     public string localPlayerId;
-    public PlayerController playerPrefab;
-    Dictionary<string, PlayerController> playerUnits = new Dictionary<string, PlayerController>();
+    public UnitBase playerPrefab;
+    Dictionary<string, UnitBase> playerUnits = new Dictionary<string, UnitBase>();
     Dictionary<string, PlayerInfoData> prevPlayerData = new Dictionary<string, PlayerInfoData>();
 
     // Start is called before the first frame update
@@ -22,13 +22,6 @@ public class GameplayManager : Singleton<GameplayManager>
         
     }
 
-    public PlayerController GetLocalPlayer()
-    {
-        if( playerUnits.ContainsKey( localPlayerId ) )
-            return playerUnits[localPlayerId];
-        return null;
-    }
-
     public void SpawnPlayer( string playerId, Vector3 pos, bool isLocalPlayer )
     {
         if( playerUnits.ContainsKey( playerId ) )
@@ -37,13 +30,16 @@ public class GameplayManager : Singleton<GameplayManager>
         }
         else
         {
-            PlayerController player = Instantiate( playerPrefab );
+            UnitBase player = Instantiate( playerPrefab );
             player.transform.position = pos;
-            player.SetId( playerId, isLocalPlayer );
+            player.SetUserId( playerId, isLocalPlayer );
             playerUnits.Add( playerId, player );
 
             if( isLocalPlayer )
+            {
                 localPlayerId = playerId;
+                PlayerController.Instance.localPlayer = player;
+            }
         }
     }
 
@@ -69,10 +65,13 @@ public class GameplayManager : Singleton<GameplayManager>
                 playerUnits[playerData.id].transform.rotation = nextRotation;
                 playerUnits[playerData.id].SetHealth( playerData.health );
             }
+            else
+            {
+                // PlayerController will change the transform directly by now.
+            }
 
             if( playerData.command != null && playerData.command != "" )
             {
-                //Debug.Log( " " + player.id.ToString() + " ] " + player.action.ToString() );
                 playerUnits[playerData.id].AddCommand( playerData.command );
             }
         }
@@ -94,12 +93,4 @@ public class GameplayManager : Singleton<GameplayManager>
         }
     }
 
-    public void RevivePlayer()
-    {
-        PlayerController localPlayer = GetLocalPlayer();
-        if( localPlayer != null )
-        {
-            localPlayer.Reset();
-        }
-    }
 }

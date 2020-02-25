@@ -36,7 +36,8 @@ public class UnitBase : StateMachine
     public GameObject killParticle;
     public GameObject model;
     public Animator animator;
-    //public UnitItemUICtrl unitUI;
+    public GameObject cameraSpot;
+    public PlayerUI unitUI;
 
     /// <summary>
     /// Navigation Agent
@@ -47,9 +48,15 @@ public class UnitBase : StateMachine
     /// <summary>
     /// Identification
     /// </summary>
-    [HideInInspector] public int unitId;
+    [HideInInspector] public string playerId;
     [HideInInspector] public int teamId;
     [HideInInspector] public bool isLocalPlayer;
+
+    /// <summary>
+    /// Server side events
+    /// </summary>
+    // messages received from the server
+    Queue<PlayerCommand> commandQueue = new Queue<PlayerCommand>();
 
     /// <summary>
     /// Weapon
@@ -65,9 +72,9 @@ public class UnitBase : StateMachine
     {
         get { return currentHealth / maxHealth; }
     }
-    public bool IsKilled
+    public bool IsAlive
     {
-        get { return currentHealth <= 0.0f; }
+        get { return currentHealth > 0.0f; }
     }
     public EventUnitKilled UnitKilled;
 
@@ -107,11 +114,19 @@ public class UnitBase : StateMachine
 
     protected virtual void Start()
     {
-        currentWeapon.owner = this;
-        ChangeState( UnitState.Idle );
+        Reset();
 
         EnableDebug( false );
     }
+
+    public void Reset()
+    {
+        currentHealth = maxHealth;
+        model.SetActive( true );
+
+        currentWeapon.owner = this;
+        ChangeState( UnitState.Idle );
+    }   
 
     [System.Diagnostics.Conditional("DEBUG")]
     void EnableDebug( bool enable )
@@ -130,16 +145,26 @@ public class UnitBase : StateMachine
     {
         //animator.SetInteger( "AnimState", ( int )anim );
         //DebugExtension.LogLevel( "Change Animation to " + anim.ToString(), DebugExtension.LogType.Animation );
-        animator.SetTrigger( anim.ToString() );
+        //animator.SetTrigger( anim.ToString() );
     }
 
-    protected virtual void Update()
+    protected virtual void FixedUpdate()
     {
-        if( IsKilled )
+        if( !IsAlive )
             return;
 
         if( curState != null )
             curState.Execute();
+
+        if( isLocalPlayer )
+        {
+
+        }
+        else
+        {
+            if( unitUI )
+                unitUI.gameObject.transform.rotation = Camera.main.transform.rotation;
+        }
 
         if( debugDraw )
         {
@@ -151,7 +176,65 @@ public class UnitBase : StateMachine
         {
             //unitUI.DebugInfoText.text = string.Empty;
         }
+
+        if( commandQueue.Count > 0 )
+        {
+            ExecuteCommand( commandQueue.Dequeue() );
+        }
     }
+
+    #region Commands
+    public void AddCommand( string commandStr )
+    {
+        PlayerCommand command;
+        if( System.Enum.TryParse( commandStr, out command ) )
+            AddCommand( command );
+    }
+
+    public void AddCommand( PlayerCommand command )
+    {
+        Debug.Log( "[" + Time.time.ToString() + "] receive command : " + command.ToString() );
+        commandQueue.Enqueue( command );
+    }
+
+    void ExecuteCommand( PlayerCommand command )
+    {
+        Debug.Log( "[ " + Time.time.ToString() + "] execute command : " + command.ToString() );
+        switch( command )
+        {
+            case PlayerCommand.FireBullet:
+                FireBullet();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void FireBullet()
+    {
+        ChangeState( UnitState.Attack );
+    }
+
+
+    #endregion
+
+    #region User Data
+    public void SetUserId( string clientId, bool isLocal )
+    {
+        playerId = clientId;
+        if( unitUI )
+            unitUI.SetUserData( clientId, isLocal );
+
+        isLocalPlayer = isLocal;
+        if( isLocalPlayer )
+        {
+            Camera.main.transform.parent = cameraSpot.transform;
+            Camera.main.transform.localPosition = Vector3.zero;
+            Camera.main.transform.localRotation = Quaternion.identity;
+        }
+    }
+
+    #endregion
 
     #region Nav Mesh Agent
     public void StartNavigation()
@@ -208,6 +291,8 @@ public class UnitBase : StateMachine
     public void Die()
     {
         gameObject.SetActive(false);
+        if( isLocalPlayer )
+            PlayerController.Instance.OnDead();
         //UnitKilled.Invoke(this);
     }
 
@@ -218,7 +303,7 @@ public class UnitBase : StateMachine
             Die();
         else
         {
-            //unitUI.SetEnergyBarProgress(HealthRate);
+            unitUI.SetHealthBarProgress(HealthRate);
         }
             
     }

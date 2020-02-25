@@ -10,13 +10,12 @@ using System.Net;
 public class PlayerInfoData
 {
     public string id;
-    public Color color;
+    public int unitId;
     
     public Vector3 pos;
     public Quaternion rotation;
 
     public float health;
-
     public string command;
 }
 
@@ -51,7 +50,7 @@ public class NetworkManager : Singleton<NetworkManager>
 
         udp.BeginReceive(new AsyncCallback(OnReceived), udp);
 
-        InvokeRepeating("HeartBeat", 1.0f, 1.0f / numUpdatePerSecond );
+        InvokeRepeating("SendPlayerInfo", 1.0f, 1.0f / numUpdatePerSecond );
     }
 
     void OnDestroy(){
@@ -120,7 +119,7 @@ public class NetworkManager : Singleton<NetworkManager>
     [Serializable]
     public class PlayerReceivedData {
         public string id;
-        public receivedColor color;
+        public int unitId;
         public receivedPos pos;
         public receivedRotation rotation;
         public float health;
@@ -131,7 +130,7 @@ public class NetworkManager : Singleton<NetworkManager>
         {
             PlayerInfoData info = new PlayerInfoData();
             info.id = data.id;
-            info.color = data.color;
+            info.unitId = data.unitId;
             info.pos = data.pos;
             info.rotation = data.rotation;
             info.health = data.health;
@@ -141,13 +140,13 @@ public class NetworkManager : Singleton<NetworkManager>
     }
 
     [Serializable]
-    public class NewPlayer{
+    public class NewPlayer {
         public commands cmd;
         public PlayerReceivedData player;
     }
 
     [Serializable]
-    public class GameState{
+    public class GameState {
         public commands cmd;
         public PlayerReceivedData[] players;
     }
@@ -173,7 +172,7 @@ public class NetworkManager : Singleton<NetworkManager>
         
         // do what you'd like with `message` here:
         string returnData = Encoding.ASCII.GetString(message);
-        //Debug.Log("Got this: " + returnData);
+        Debug.Log("Got this: " + returnData);
         
         latestMessage = JsonUtility.FromJson<Message>(returnData);
         try{
@@ -222,12 +221,6 @@ public class NetworkManager : Singleton<NetworkManager>
             foreach( var newPlayer in newPlayers )
             {
                 Vector3 pos = new Vector3( newPlayer.pos.x, newPlayer.pos.y, newPlayer.pos.z );
-
-                //PlayerController player = Instantiate( playerPrefab );
-                //player.transform.position = pos;
-                //player.SetId( newPlayer.id, clientId == newPlayer.id );
-                //playerUnits.Add( newPlayer.id, player );
-
                 GameplayManager.Instance.SpawnPlayer( newPlayer.id, pos, clientId == newPlayer.id );
             }
             newPlayers.Clear();
@@ -268,22 +261,25 @@ public class NetworkManager : Singleton<NetworkManager>
         }
     }
     
-    void HeartBeat(){
+    void SendPlayerInfo(){
 
         if( clientId != null )
         {
-            PlayerController localPlayer = GameplayManager.Instance.GetLocalPlayer();
-            PlayerInfoData data = new PlayerInfoData();
-            data.id = clientId;
-            data.pos = localPlayer.transform.position;
-            data.rotation = localPlayer.transform.rotation;
-            data.health = localPlayer.currentHealth;
-            if( localPlayer.HasMessage() )
-                data.command = localPlayer.PopMessage();
-            string messageData = JsonUtility.ToJson( data );
+            UnitBase localPlayer = PlayerController.Instance.localPlayer;
+            if( localPlayer )
+            {
+                PlayerInfoData data = new PlayerInfoData();
+                data.id = clientId;
+                data.pos = localPlayer.transform.position;
+                data.rotation = localPlayer.transform.rotation;
+                data.health = localPlayer.currentHealth;
+                if( PlayerController.Instance.HasMessage() )
+                    data.command = PlayerController.Instance.PopMessage();
+                string messageData = JsonUtility.ToJson( data );
 
-            Byte[] sendBytes = Encoding.ASCII.GetBytes(messageData);
-            udp.Send( sendBytes, sendBytes.Length );
+                Byte[] sendBytes = Encoding.ASCII.GetBytes( messageData );
+                udp.Send( sendBytes, sendBytes.Length );
+            }
         }
     }
 
