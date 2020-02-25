@@ -11,6 +11,7 @@ public class PlayerInfoData
 {
     public string id;
     public int unitId;
+    public int teamId;
     
     public Vector3 pos;
     public Quaternion rotation;
@@ -22,8 +23,8 @@ public class PlayerInfoData
 
 public class NetworkManager : Singleton<NetworkManager>
 {
-    List<PlayerReceivedData> newPlayers = new List<PlayerReceivedData>();
-    List<PlayerReceivedData> disconnectedPlayers = new List<PlayerReceivedData>();
+    Queue<PlayerReceivedData> newPlayers = new Queue<PlayerReceivedData>();
+    Queue<PlayerReceivedData> disconnectedPlayers = new Queue<PlayerReceivedData>();
 
     public UdpClient udp;
     public string serverIp = "3.219.69.41";
@@ -120,6 +121,7 @@ public class NetworkManager : Singleton<NetworkManager>
     public class PlayerReceivedData {
         public string id;
         public int unitId;
+        public int teamId;
         public receivedPos pos;
         public receivedRotation rotation;
         public float health;
@@ -131,6 +133,7 @@ public class NetworkManager : Singleton<NetworkManager>
             PlayerInfoData info = new PlayerInfoData();
             info.id = data.id;
             info.unitId = data.unitId;
+            info.teamId = data.teamId;
             info.pos = data.pos;
             info.rotation = data.rotation;
             info.health = data.health;
@@ -172,7 +175,7 @@ public class NetworkManager : Singleton<NetworkManager>
         
         // do what you'd like with `message` here:
         string returnData = Encoding.ASCII.GetString(message);
-        Debug.Log("Got this: " + returnData);
+        //Debug.Log("Got this: " + returnData);
         
         latestMessage = JsonUtility.FromJson<Message>(returnData);
         try{
@@ -181,13 +184,13 @@ public class NetworkManager : Singleton<NetworkManager>
                     {
                         NewPlayer newPlayer = JsonUtility.FromJson<NewPlayer>( returnData );
                         clientId = newPlayer.player.id;
-                        newPlayers.Add( newPlayer.player );
+                        newPlayers.Enqueue( newPlayer.player );
                         break;
                     }
                 case commands.NEW_CLIENT:
                     {
                         NewPlayer newPlayer = JsonUtility.FromJson<NewPlayer>( returnData );
-                        newPlayers.Add( newPlayer.player );
+                        newPlayers.Enqueue( newPlayer.player );
                         break;
                     }
                 case commands.UPDATE:
@@ -200,7 +203,7 @@ public class NetworkManager : Singleton<NetworkManager>
                     break;
                 case commands.CLIENT_DROPPED:
                     NewPlayer droppedPlayer = JsonUtility.FromJson<NewPlayer>( returnData );
-                    disconnectedPlayers.Add( droppedPlayer.player );
+                    disconnectedPlayers.Enqueue( droppedPlayer.player );
                     break;
                 default:
                     Debug.Log("Error");
@@ -215,15 +218,12 @@ public class NetworkManager : Singleton<NetworkManager>
         socket.BeginReceive(new AsyncCallback(OnReceived), socket);
     }
 
-    void SpawnPlayers(  ){
-        if( newPlayers.Count > 0 )
+    void SpawnPlayers(){
+        while( newPlayers.Count > 0 )
         {
-            foreach( var newPlayer in newPlayers )
-            {
-                Vector3 pos = new Vector3( newPlayer.pos.x, newPlayer.pos.y, newPlayer.pos.z );
-                GameplayManager.Instance.SpawnPlayer( newPlayer.id, pos, clientId == newPlayer.id );
-            }
-            newPlayers.Clear();
+            var newPlayer = newPlayers.Dequeue();
+            Vector3 pos = new Vector3( newPlayer.pos.x, newPlayer.pos.y, newPlayer.pos.z );
+            GameplayManager.Instance.SpawnPlayer( newPlayer.id, pos, clientId == newPlayer.id );
         }
     }
 
@@ -251,13 +251,10 @@ public class NetworkManager : Singleton<NetworkManager>
     }
 
     void DestroyPlayers(){
-        if( disconnectedPlayers.Count > 0 )
+        while( disconnectedPlayers.Count > 0 )
         {
-            foreach( var droppedPlayer in disconnectedPlayers )
-            {
-                GameplayManager.Instance.DisconnectPlayer( droppedPlayer.id );
-            }
-            disconnectedPlayers.Clear();
+            var droppedPlayer = disconnectedPlayers.Dequeue();
+            GameplayManager.Instance.DisconnectPlayer( droppedPlayer.id );
         }
     }
     
