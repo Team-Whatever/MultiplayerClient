@@ -223,7 +223,7 @@ public class NetworkManager : Singleton<NetworkManager>
         {
             var newPlayer = newPlayers.Dequeue();
             Vector3 pos = new Vector3( newPlayer.pos.x, newPlayer.pos.y, newPlayer.pos.z );
-            GameplayManager.Instance.SpawnPlayer( newPlayer.id, pos, clientId == newPlayer.id );
+            GameplayManager.Instance.SpawnPlayer( newPlayer.id, newPlayer.unitId, pos, clientId == newPlayer.id );
         }
     }
 

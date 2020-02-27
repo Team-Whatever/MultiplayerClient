@@ -22,7 +22,7 @@ public class GameplayManager : Singleton<GameplayManager>
         
     }
 
-    public void SpawnPlayer( string playerId, Vector3 pos, bool isLocalPlayer )
+    public void SpawnPlayer( string playerId, int unitId, Vector3 pos, bool isLocalPlayer )
     {
         if( playerUnits.ContainsKey( playerId ) )
         {
@@ -32,7 +32,7 @@ public class GameplayManager : Singleton<GameplayManager>
         {
             UnitBase player = Instantiate( playerPrefab );
             player.transform.position = pos;
-            player.SetUserId( playerId, isLocalPlayer );
+            player.SetUserId( playerId, unitId, isLocalPlayer );
             playerUnits.Add( playerId, player );
 
             if( isLocalPlayer )

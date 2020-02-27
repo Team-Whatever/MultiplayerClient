@@ -62,6 +62,7 @@ public class UnitBase : StateMachine
     /// <summary>
     /// Identification
     /// </summary>
+    public GameObject[] unitModels;
     [HideInInspector] public string playerId;
     [HideInInspector] public int teamId;
     [HideInInspector] public bool isLocalPlayer;
@@ -233,11 +234,19 @@ public class UnitBase : StateMachine
     #endregion
 
     #region User Data
-    public void SetUserId( string clientId, bool isLocal )
+    public void SetUserId( string clientId, int unitId, bool isLocal )
     {
         playerId = clientId;
         if( unitUI )
             unitUI.SetUserData( clientId, isLocal );
+
+        if( unitId < unitModels.Length )
+        {
+            for( var i = 0; i < unitModels.Length; i++ )
+            {
+                unitModels[i].SetActive( i == unitId );
+            }
+        }
 
         isLocalPlayer = isLocal;
         if( isLocalPlayer )
