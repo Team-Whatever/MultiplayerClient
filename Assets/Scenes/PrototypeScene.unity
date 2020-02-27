@@ -10696,7 +10696,7 @@ MonoBehaviour:
   localPlayer: {fileID: 0}
   isLocalPlayer: 0
   moveSpeed: 10
-  angularSpeed: 60
+  angularSpeed: 30
 --- !u!1001 &1208239923
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -221,9 +221,8 @@ public class NetworkManager : Singleton<NetworkManager>
     void SpawnPlayers(){
         while( newPlayers.Count > 0 )
         {
-            var newPlayer = newPlayers.Dequeue();
-            Vector3 pos = new Vector3( newPlayer.pos.x, newPlayer.pos.y, newPlayer.pos.z );
-            GameplayManager.Instance.SpawnPlayer( newPlayer.id, newPlayer.unitId, pos, clientId == newPlayer.id );
+            PlayerInfoData newPlayer = newPlayers.Dequeue();
+            GameplayManager.Instance.SpawnPlayer( newPlayer, clientId == newPlayer.id );
         }
     }
 

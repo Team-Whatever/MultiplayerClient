@@ -22,22 +22,22 @@ public class GameplayManager : Singleton<GameplayManager>
         
     }
 
-    public void SpawnPlayer( string playerId, int unitId, Vector3 pos, bool isLocalPlayer )
+    public void SpawnPlayer( PlayerInfoData playerInfo, bool isLocalPlayer )
     {
-        if( playerUnits.ContainsKey( playerId ) )
+        if( playerUnits.ContainsKey( playerInfo.id ) )
         {
-            Debug.Assert( false, playerId + " player already  exist." );
+            Debug.Assert( false, playerInfo.id + " player already  exist." );
         }
         else
         {
             UnitBase player = Instantiate( playerPrefab );
-            player.transform.position = pos;
-            player.SetUserId( playerId, unitId, isLocalPlayer );
-            playerUnits.Add( playerId, player );
+            player.transform.position = playerInfo.pos;
+            player.SetUserId( playerInfo.id, playerInfo.unitId, playerInfo.teamId, isLocalPlayer );
+            playerUnits.Add( playerInfo.id, player );
 
             if( isLocalPlayer )
             {
-                localPlayerId = playerId;
+                localPlayerId = playerInfo.id;
                 PlayerController.Instance.localPlayer = player;
             }
         }
