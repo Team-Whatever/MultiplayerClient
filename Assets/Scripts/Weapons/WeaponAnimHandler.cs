@@ -17,7 +17,7 @@ public class WeaponAnimHandler : MonoBehaviour
         owner.OnBeginAttack();
 	}
 
-    public void Hit()
+    public void Fire()
     {
         //DebugExtension.LogLevel( owner.ToString() + " : Hit", DebugExtension.LogType.Gameplay );
         owner.OnFire();

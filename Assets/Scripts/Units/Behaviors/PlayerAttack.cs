@@ -7,8 +7,10 @@ public class PlayerAttack : PlayerBaseState
 	public override void Enter()
 	{
 		player.StopNavigation();
-		ChangeAnimation(AnimState.Attack);
-	}
+        
+        owner.animator.SetBool( "Shoot_b", true );
+        owner.animator.SetInteger( "WeaponType_int", (int)owner.currentWeapon.weaponType );
+    }
 
 	public override void Execute()
 	{
@@ -16,7 +18,8 @@ public class PlayerAttack : PlayerBaseState
 
 	public override void Exit()
 	{
-	}
+        owner.animator.SetBool( "Shoot_b", false );
+    }
 
 	public override string ToString()
 	{

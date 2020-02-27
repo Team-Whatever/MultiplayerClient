@@ -23,13 +23,13 @@ public class StateMachine : MonoBehaviour
         {
             if( curState != null )
             {
-                //DebugExtension.LogLevel( curState.owner.ToString() + " is exiting " + curState.ToString() + " state.", DebugExtension.LogType.AI );
+                Debug.Log( curState.owner.ToString() + " is exiting " + curState.ToString() + " state." );
                 curState.Exit();
             }
             curState = newState;
             if( curState != null )
             {
-                //DebugExtension.LogLevel( curState.owner.ToString() + " is entering " + curState.ToString() + " state.", DebugExtension.LogType.AI );
+                Debug.Log( curState.owner.ToString() + " is entering " + curState.ToString() + " state." );
                 curState.Enter();
             }
         }

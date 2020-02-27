@@ -4,6 +4,8 @@ using UnityEngine;
 
 public abstract class WeaponBase : MonoBehaviour
 {
+    public WeaponType weaponType;
+
     public float attackRange;
     public float attackDamage;
     public float damageMultiplier = 1.0f;
@@ -24,7 +26,6 @@ public abstract class WeaponBase : MonoBehaviour
             return Mathf.Clamp01((Time.time - lastAttackedTime) / attackCooldown);
         }
     }
-    public bool isBeganAttack;
     
     [HideInInspector]
     public UnitBase owner;

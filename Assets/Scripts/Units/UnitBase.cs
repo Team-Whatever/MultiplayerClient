@@ -26,6 +26,20 @@ public enum AnimState
     Dying,
 }
 
+public enum WeaponType
+{
+    HandGun = 1,
+    Auto1 = 2,
+    Auto2 = 3,
+    ShotGun = 4,
+    Rifle1 = 5,
+    Rifle2 = 6,
+    SubMachineGun = 7,
+    RPG_Shoot = 8,
+    MiniGun = 9,
+    Grenade = 10,
+}
+
 [System.Serializable] public class EventUnitKilled : UnityEvent<UnitBase> { }
 
 public class UnitBase : StateMachine
@@ -337,6 +351,7 @@ public class UnitBase : StateMachine
     public void OnEndAttack()
     {
         currentWeapon.OnEndAttack();
+        ChangeState( UnitState.Idle );
     }
 
     public void Aim( Vector3 target )
