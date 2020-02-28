@@ -38,26 +38,30 @@ public class PlayerController : Singleton<PlayerController>
 
     public void FixedUpdate()
     {
-        
         if( localPlayer && localPlayer.IsAlive )
         {
             Transform curTransform = localPlayer.transform;
+            Vector3 moveVector = Vector3.zero;
             if( Input.GetKey( KeyCode.W ) )
             {
-                curTransform.position += curTransform.forward * Time.deltaTime * moveSpeed;
+                moveVector += curTransform.forward;
             }
             if( Input.GetKey( KeyCode.S ) )
             {
-                curTransform.position -= curTransform.forward * Time.deltaTime * moveSpeed;
+                moveVector += -curTransform.forward;
             }
             if( Input.GetKey( KeyCode.A ) )
             {
-                curTransform.position -= curTransform.right * Time.deltaTime * moveSpeed;
+                moveVector += -curTransform.right;
             }
             if( Input.GetKey( KeyCode.D ) )
             {
-                curTransform.position += curTransform.right * Time.deltaTime * moveSpeed;
+                moveVector += curTransform.right;
             }
+            if( moveVector != Vector3.zero )
+                localPlayer.MoveBy( moveVector );
+            else
+                localPlayer.StopMove();
 
             // mouse right drag
             if( Input.GetMouseButton( 1 ) )

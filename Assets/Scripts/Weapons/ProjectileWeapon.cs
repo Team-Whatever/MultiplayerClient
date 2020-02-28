@@ -39,7 +39,7 @@ public class ProjectileWeapon : WeaponBase
 
     void FireBullet()
     {
-        Bullet bullet = Instantiate( bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation );
+        Bullet bullet = Instantiate( bulletPrefab, bulletSpawnPoint.position, owner.transform.rotation );
         float damage = attackDamage * damageMultiplier + Random.Range( -damageSpread, damageSpread );
         bullet.Fire( owner.teamId, damage, bulletSpeed, criticalChance * criticalMultiplier );
 
@@ -52,7 +52,6 @@ public class ProjectileWeapon : WeaponBase
         {
             muzzleEffect.Play();
         }
-
     }
 
     private void PlayMuzzleFlash()

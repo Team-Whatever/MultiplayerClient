@@ -6,8 +6,6 @@ public class PlayerAttack : PlayerBaseState
 {
 	public override void Enter()
 	{
-		player.StopNavigation();
-        
         owner.animator.SetBool( "Shoot_b", true );
         owner.animator.SetInteger( "WeaponType_int", (int)owner.currentWeapon.weaponType );
     }

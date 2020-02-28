@@ -61,7 +61,7 @@ public class GameplayManager : Singleton<GameplayManager>
                     nextRotation = Quaternion.Lerp( prevPlayerData.rotation, playerData.rotation, delta );
                 }
 
-                playerUnits[playerData.id].transform.position = nextPos;
+                playerUnits[playerData.id].MoveTo( nextPos );
                 playerUnits[playerData.id].transform.rotation = nextRotation;
                 playerUnits[playerData.id].SetHealth( playerData.health );
             }

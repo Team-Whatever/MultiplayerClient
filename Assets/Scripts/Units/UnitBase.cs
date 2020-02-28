@@ -241,20 +241,20 @@ public class UnitBase : StateMachine
         if( unitUI )
             unitUI.SetUserData( clientId, isLocal );
 
-        if( unitId < unitModels.Length )
-        {
-            for( var i = 0; i < unitModels.Length; i++ )
-            {
-                unitModels[i].SetActive( i == unitId );
-            }
-        }
-
         isLocalPlayer = isLocal;
         if( isLocalPlayer )
         {
             Camera.main.transform.parent = cameraSpot.transform;
             Camera.main.transform.localPosition = Vector3.zero;
             Camera.main.transform.localRotation = Quaternion.identity;
+        }
+
+        if( unitId < unitModels.Length )
+        {
+            for( var i = 0; i < unitModels.Length; i++ )
+            {
+                unitModels[i].SetActive( !isLocal && i == unitId );
+            }
         }
     }
 
@@ -267,7 +267,7 @@ public class UnitBase : StateMachine
             agent.isStopped = false;
     }
 
-    public void StopNavigation()
+    public void StopMove()
     {
         if( agent )
         {
@@ -281,6 +281,8 @@ public class UnitBase : StateMachine
         if( agent )
         {
             agent.SetDestination( position );
+            if( agent.isStopped == true )
+                ChangeState( UnitState.Move );
         }
     }
 
@@ -288,7 +290,11 @@ public class UnitBase : StateMachine
     {
         if( agent )
         {
+            //Debug.Log( string.Format( "Move by {0}", direction.ToString() ) );
             agent.velocity = direction * moveSpeed;
+
+            if( agent.isStopped == true )
+                ChangeState( UnitState.Move );
         }
     }
 

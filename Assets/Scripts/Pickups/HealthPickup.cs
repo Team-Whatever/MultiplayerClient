@@ -11,8 +11,8 @@ public class HealthPickup : MonoBehaviour
     {
         if (collider.gameObject.tag == "Player")
         {
-            FindObjectOfType<PlayerHealth>().ReceiveHealth(healthAmount);
-            StartCoroutine(RespawnTimer());
+            //FindObjectOfType<PlayerHealth>().ReceiveHealth(healthAmount);
+            //StartCoroutine(RespawnTimer());
         }
     }
 

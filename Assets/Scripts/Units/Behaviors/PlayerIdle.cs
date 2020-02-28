@@ -5,7 +5,6 @@ public class PlayerIdle : BaseState
 {
     public override void Enter()
     {
-        owner.StopNavigation();
         //ChangeAnimation( AnimState.Idle );
     }
 
