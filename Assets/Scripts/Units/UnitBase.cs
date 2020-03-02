@@ -253,7 +253,7 @@ public class UnitBase : StateMachine
         {
             for( var i = 0; i < unitModels.Length; i++ )
             {
-                unitModels[i].SetActive( !isLocal && i == unitId );
+                unitModels[i].SetActive( i == unitId );
             }
         }
     }

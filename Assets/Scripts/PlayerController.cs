@@ -69,6 +69,19 @@ public class PlayerController : Singleton<PlayerController>
                 float rotation = Input.GetAxis( "Mouse X" ) * angularSpeed;
                 curTransform.Rotate( Vector3.up, rotation );
             }
+            else
+            {
+                if( Input.GetKey( KeyCode.Q ) )
+                {
+                    float rotation = Time.deltaTime * -angularSpeed;
+                    curTransform.Rotate( Vector3.up, rotation );
+                }
+                else if( Input.GetKey( KeyCode.E ) )
+                {
+                    float rotation = Time.deltaTime * angularSpeed;
+                    curTransform.Rotate( Vector3.up, rotation );
+                }
+            }
 
             StartCoroutine( UpdateTransform( curTransform, CanvasManager.Instance.prediction.isOn ? NetworkManager.Instance.estimatedLag : 0.0f ) );
 
