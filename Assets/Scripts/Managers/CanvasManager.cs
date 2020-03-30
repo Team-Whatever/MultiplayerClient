@@ -26,11 +26,11 @@ public class CanvasManager : Singleton<CanvasManager>
 
     public void OnLagChanged()
     {
-        float newLag;
-        if( float.TryParse( lagTimeField.text, out newLag ) )
-        {
-            NetworkManager.Instance.estimatedLag = newLag;
-        }
+        //float newLag;
+        //if( float.TryParse( lagTimeField.text, out newLag ) )
+        //{
+        //    NetworkManager.Instance.estimatedLag = newLag;
+        //}
     }
 
     public void ShowDeadUI()

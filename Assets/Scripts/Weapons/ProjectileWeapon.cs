@@ -41,7 +41,7 @@ public class ProjectileWeapon : WeaponBase
     {
         Bullet bullet = Instantiate( bulletPrefab, bulletSpawnPoint.position, owner.transform.rotation );
         float damage = attackDamage * damageMultiplier + Random.Range( -damageSpread, damageSpread );
-        bullet.Fire( owner.teamId, damage, bulletSpeed, criticalChance * criticalMultiplier );
+        bullet.Fire( owner.TeamId, damage, bulletSpeed, criticalChance * criticalMultiplier );
 
         if( attackParticle != null )
         {

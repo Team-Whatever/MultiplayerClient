@@ -19,10 +19,10 @@ public class Bullet : MonoBehaviour
 
             // HACK : until we get server-side physics
             // each client determines the damage it self
-            if( !targetUnit.isLocalPlayer )
+            if( !targetUnit.IsLocalPlayer )
                 return;
 
-            if( targetUnit != null && teamId != targetUnit.teamId )
+            if( targetUnit != null && teamId != targetUnit.TeamId )
             {
                 targetUnit.TakeDamage( damage );
 

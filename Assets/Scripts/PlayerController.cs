@@ -27,6 +27,7 @@ public class PlayerController : Singleton<PlayerController>
 
     // messages to be sent to the server
     Queue<PlayerCommand> messageQueue = new Queue<PlayerCommand>();
+    public bool IsDirtyFlag { get; private set; }
 
     public void Awake()
     {
@@ -83,7 +84,7 @@ public class PlayerController : Singleton<PlayerController>
                 }
             }
 
-            StartCoroutine( UpdateTransform( curTransform, CanvasManager.Instance.prediction.isOn ? NetworkManager.Instance.estimatedLag : 0.0f ) );
+            StartCoroutine( UpdateTransform( curTransform, 0.0f ) );
 
 
             if( Input.GetKeyDown( KeyCode.Space ) )
@@ -128,5 +129,10 @@ public class PlayerController : Singleton<PlayerController>
 
         // TODO : find player respawning point
         //localPlayer.transform.position = playerSpawner.transform.position;
+    }
+
+    public void ClearDirtyFlag()
+    {
+        IsDirtyFlag = false;
     }
 }

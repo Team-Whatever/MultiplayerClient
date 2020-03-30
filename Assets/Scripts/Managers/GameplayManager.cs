@@ -5,10 +5,13 @@ using UnityEngine;
 public class GameplayManager : Singleton<GameplayManager>
 {
     // the player(owner) of this client
-    public string localPlayerId;
+    public int localPlayerId;
     public UnitBase playerPrefab;
-    Dictionary<string, UnitBase> playerUnits = new Dictionary<string, UnitBase>();
-    Dictionary<string, PlayerInfoData> prevPlayerData = new Dictionary<string, PlayerInfoData>();
+    Dictionary<int, UnitBase> playerUnits = new Dictionary<int, UnitBase>();
+    Dictionary<int, PlayerData> prevPlayerData = new Dictionary<int, PlayerData>();
+    Dictionary<int, bool> playersUpdated = new Dictionary<int, bool>();
+    public float lastUpdatedTime;
+    public float prevUpdatedTime;
 
     // Start is called before the first frame update
     void Start()
@@ -22,7 +25,7 @@ public class GameplayManager : Singleton<GameplayManager>
         
     }
 
-    public void SpawnPlayer( PlayerInfoData playerInfo, bool isLocalPlayer )
+    public void SpawnPlayer( PlayerData playerInfo, bool isLocalPlayer )
     {
         if( playerUnits.ContainsKey( playerInfo.id ) )
         {
@@ -31,8 +34,7 @@ public class GameplayManager : Singleton<GameplayManager>
         else
         {
             UnitBase player = Instantiate( playerPrefab );
-            player.transform.position = playerInfo.pos;
-            player.SetUserId( playerInfo.id, playerInfo.unitId, playerInfo.teamId, isLocalPlayer );
+            player.SetPlayerData( playerInfo, isLocalPlayer );
             playerUnits.Add( playerInfo.id, player );
 
             if( isLocalPlayer )
@@ -43,41 +45,44 @@ public class GameplayManager : Singleton<GameplayManager>
         }
     }
 
-    public void UpdatePlayer( PlayerInfoData playerData, PlayerInfoData prevPlayerData, float delta )
+    public void UpdatePlayers( List<PlayerData> playersData )
     {
-        if( playerUnits.ContainsKey( playerData.id ) )
+        lastUpdatedTime = Time.time;
+        // 
+        foreach( var kv in playerUnits )
         {
-            if( playerData.id != localPlayerId )
+            kv.Value.IsLatestDataReceived = false;
+        }
+        foreach( var playerData in playersData )
+        {
+            if( playerUnits.ContainsKey( playerData.id ) )
             {
-                Vector3 nextPos = playerData.pos;
-                Quaternion nextRotation = playerData.rotation;
-                if( CanvasManager.Instance.reconciliation.isOn )
+                if( playerData.id != localPlayerId )
                 {
-                    // To be implemented
+                    playerUnits[playerData.id].targetPosition = playerData.position;
+                    playerUnits[playerData.id].targetRotation = playerData.rotation;
                 }
-                if( CanvasManager.Instance.interpolation.isOn && prevPlayerData != null )
-                {
-                    nextPos = Vector3.Lerp( prevPlayerData.pos, playerData.pos, delta );
-                    nextRotation = Quaternion.Lerp( prevPlayerData.rotation, playerData.rotation, delta );
-                }
-
-                playerUnits[playerData.id].MoveTo( nextPos );
-                playerUnits[playerData.id].transform.rotation = nextRotation;
-                playerUnits[playerData.id].SetHealth( playerData.health );
             }
             else
             {
-                // PlayerController will change the transform directly by now.
+                SpawnPlayer( playerData, false );
             }
-
-            if( playerData.command != null && playerData.command != "" )
+            playerUnits[playerData.id].IsLatestDataReceived = true;
+        }
+        foreach( var kv in playerUnits )
+        {
+            if( kv.Value.IsLatestDataReceived == false )
             {
-                playerUnits[playerData.id].AddCommand( playerData.command );
+                // disconnect one player at a time
+                DisconnectPlayer( kv.Key );
+                break;
             }
         }
+
+        prevUpdatedTime = lastUpdatedTime;
     }
 
-    public void DisconnectPlayer( string playerId )
+    public void DisconnectPlayer( int playerId )
     {
         if( playerUnits.ContainsKey( playerId ) )
         {

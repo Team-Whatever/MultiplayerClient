@@ -52,26 +52,53 @@ public class UnitBase : StateMachine
     public Animator animator;
     public GameObject cameraSpot;
     public PlayerUI unitUI;
+    public GameObject[] unitModels;
 
     /// <summary>
     /// Navigation Agent
     /// </summary>
     public NavMeshAgent agent;
     public float moveSpeed;
+    public Vector3? targetPosition;
+    public Quaternion? targetRotation;
 
     /// <summary>
     /// Identification
     /// </summary>
-    public GameObject[] unitModels;
-    [HideInInspector] public string playerId;
-    public int teamId;
-    [HideInInspector] public bool isLocalPlayer;
+    public bool IsLocalPlayer { get; set; }
+    public int PlayerId
+    {
+        get
+        {
+            return playerInfo != null ? playerInfo.id : -1;
+        }
+    }
+    public int TeamId
+    {
+        get
+        {
+            return playerInfo != null ? playerInfo.teamId : -1;
+        }
+    }
+    public int UnitId
+    {
+        get
+        {
+            return playerInfo != null ? playerInfo.unitId : -1;
+        }
+    }
+
 
     /// <summary>
     /// Server side events
     /// </summary>
     // messages received from the server
     Queue<PlayerCommand> commandQueue = new Queue<PlayerCommand>();
+    // returns true if any of player info is changed
+    public bool IsDirtyFlag { get; private set; }
+    // checks if the unit data is up to dated
+    public bool IsLatestDataReceived { get; set; }
+    PlayerData playerInfo;
 
     /// <summary>
     /// Weapon
@@ -171,7 +198,7 @@ public class UnitBase : StateMachine
         if( curState != null )
             curState.Execute();
 
-        if( isLocalPlayer )
+        if( IsLocalPlayer )
         {
 
         }
@@ -234,28 +261,25 @@ public class UnitBase : StateMachine
     #endregion
 
     #region User Data
-    public void SetUserId( string clientId, int unitId, int teamId, bool isLocal )
+    
+    public void SetPlayerData( PlayerData data, bool isLocal )
     {
-        this.playerId = clientId;
-        this.teamId = teamId;
+        playerInfo = data;
         if( unitUI )
-            unitUI.SetUserData( clientId, isLocal );
+            unitUI.SetUserData( data.id, isLocal );
 
-        isLocalPlayer = isLocal;
-        if( isLocalPlayer )
+        transform.position = data.position;
+        transform.rotation = data.rotation;
+
+        IsLocalPlayer = isLocal;
+        if( IsLocalPlayer )
         {
             Camera.main.transform.parent = cameraSpot.transform;
             Camera.main.transform.localPosition = Vector3.zero;
             Camera.main.transform.localRotation = Quaternion.identity;
         }
 
-        if( unitId < unitModels.Length )
-        {
-            for( var i = 0; i < unitModels.Length; i++ )
-            {
-                unitModels[i].SetActive( i == unitId );
-            }
-        }
+        IsDirtyFlag = true;
     }
 
     #endregion
@@ -321,7 +345,7 @@ public class UnitBase : StateMachine
     public void Die()
     {
         gameObject.SetActive(false);
-        if( isLocalPlayer )
+        if( IsLocalPlayer )
             PlayerController.Instance.OnDead();
         //UnitKilled.Invoke(this);
     }
@@ -351,6 +375,14 @@ public class UnitBase : StateMachine
 
         //unitUI.SetEnergyBarProgress( HealthRate );
     }
+
+    public PlayerData GetPlayerData()
+    {
+        playerInfo.position = transform.position;
+        playerInfo.rotation = transform.rotation;
+        return playerInfo;
+    }
+
 
     #region Weapon functions
 
