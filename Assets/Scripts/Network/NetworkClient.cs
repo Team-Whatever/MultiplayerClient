@@ -19,6 +19,7 @@ public class NetworkClient : MonoBehaviour
         m_Connection = default( NetworkConnection );
         var endpoint = NetworkEndPoint.Parse( serverIP, serverPort );
         m_Connection = m_Driver.Connect( endpoint );
+        GameplayManager.Instance.IsServer = false;
     }
 
     void SendToServer( string message )
@@ -51,8 +52,8 @@ public class NetworkClient : MonoBehaviour
 
         switch( header.cmd )
         {
-            case Commands.HANDSHAKE:
-                HandshakeMsg hsMsg = JsonUtility.FromJson<HandshakeMsg>( recMsg );
+            case Commands.CONNECTED:
+                ConnectMsg hsMsg = JsonUtility.FromJson<ConnectMsg>( recMsg );
                 Debug.Log( "[Client] Handshake message received! " + hsMsg.player.id );
                 GameplayManager.Instance.SpawnPlayer( hsMsg.player, true );
                 break;
@@ -126,11 +127,10 @@ public class NetworkClient : MonoBehaviour
         UnitBase localPlayer = PlayerController.Instance.localPlayer;
         if( localPlayer )
         {
-            // send data at least once in a second
-            if( PlayerController.Instance.IsDirtyFlag ||
-                ( Time.time - lastTimestamp > 2.0 ) )
+            // send data at least once in two seconds
+            if( PlayerController.Instance.HasCommand() || Time.time - lastTimestamp > 2.0 )
             {
-                PlayerUpdateMsg puMsg = new PlayerUpdateMsg( localPlayer.GetPlayerData() );
+                PlayerUpdateMsg puMsg = new PlayerUpdateMsg( localPlayer.GetPlayerData(), PlayerController.Instance.PopCommands() );
                 SendToServer( JsonUtility.ToJson( puMsg ) );
                 PlayerController.Instance.ClearDirtyFlag();
             }

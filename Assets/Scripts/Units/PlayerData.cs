@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [System.Serializable]
 public class PlayerData
@@ -12,7 +13,7 @@ public class PlayerData
     public Color color;
 
     public float health;
-    public string command;
+    public float lastUpdateTime;
 
     public PlayerData( int _id, int _unitId, float maxHealth )
     {

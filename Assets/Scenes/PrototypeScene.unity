@@ -10686,9 +10686,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a94b9262a66a4614c865f89a8ba70422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  localPlayerId: 0
   playerPrefab: {fileID: 1775839585378489473, guid: c742f0196e0378e4c8c8e811b678f068,
     type: 3}
+  playersData: []
   lastUpdatedTime: 0
   prevUpdatedTime: 0
 --- !u!4 &1197919398
@@ -10719,8 +10719,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   localPlayer: {fileID: 0}
   isLocalPlayer: 0
-  moveSpeed: 10
-  angularSpeed: 30
+  localPlayerId: 0
 --- !u!1001 &1208239923
 PrefabInstance:
   m_ObjectHideFlags: 0

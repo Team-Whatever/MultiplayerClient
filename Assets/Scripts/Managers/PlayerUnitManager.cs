@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class PlayerUnitManager
+public class PlayerUnitManager : Singleton<PlayerUnitManager>
 {
     List<PlayerData> players = new List<PlayerData>();
     Dictionary<int, PlayerData> playersDict = new Dictionary<int, PlayerData>();

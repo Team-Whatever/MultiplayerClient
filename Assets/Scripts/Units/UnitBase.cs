@@ -58,7 +58,8 @@ public class UnitBase : StateMachine
     /// Navigation Agent
     /// </summary>
     public NavMeshAgent agent;
-    public float moveSpeed;
+    public float moveSpeed = 10;
+    public float angularSpeed = 30;
     public Vector3? targetPosition;
     public Quaternion? targetRotation;
 
@@ -108,15 +109,18 @@ public class UnitBase : StateMachine
     /// <summary>
     /// Health
     /// </summary>
-    public float currentHealth;
+    public float CurrentHealth {
+        get { return playerInfo != null ? playerInfo.health : 0.0f; }
+        set { if( playerInfo != null ) playerInfo.health = value; }
+    }
     public float maxHealth;
     public float HealthRate
     {
-        get { return currentHealth / maxHealth; }
+        get { return CurrentHealth / maxHealth; }
     }
     public bool IsAlive
     {
-        get { return currentHealth > 0.0f; }
+        get { return CurrentHealth > 0.0f; }
     }
     public EventUnitKilled UnitKilled;
 
@@ -151,7 +155,7 @@ public class UnitBase : StateMachine
             _states.Add( state.unitState, state );
         }
 
-        currentHealth = maxHealth;
+        CurrentHealth = maxHealth;
     }
 
     protected virtual void Start()
@@ -163,7 +167,7 @@ public class UnitBase : StateMachine
 
     public void Reset()
     {
-        currentHealth = maxHealth;
+        CurrentHealth = maxHealth;
         model.SetActive( true );
 
         currentWeapon.owner = this;
@@ -282,6 +286,19 @@ public class UnitBase : StateMachine
         IsDirtyFlag = true;
     }
 
+
+    public PlayerData GetPlayerData()
+    {
+        return playerInfo;
+    }
+
+    public void UpdatePlayerData()
+    {
+        playerInfo.position = transform.position;
+        playerInfo.rotation = transform.rotation;
+        playerInfo.lastUpdateTime = Time.time;
+    }
+
     #endregion
 
     #region Nav Mesh Agent
@@ -322,6 +339,11 @@ public class UnitBase : StateMachine
         }
     }
 
+    public void Rotate( float angle )
+    {
+        transform.Rotate( Vector3.up, angle * angularSpeed );
+    }
+
     public bool IsReachedTarget()
     {
         if( !agent.pathPending )
@@ -352,37 +374,34 @@ public class UnitBase : StateMachine
 
     public virtual void TakeDamage(float damage)
     {
-        currentHealth = Mathf.Max( currentHealth - damage, 0.0f );
-        if( currentHealth <= 0 )
+        CurrentHealth = Mathf.Max( CurrentHealth - damage, 0.0f );
+        if( CurrentHealth <= 0 )
             Die();
         else
         {
             unitUI.SetHealthBarProgress(HealthRate);
         }
-            
     }
 
     public void Heal(float healAmount)
     {
-        currentHealth = Mathf.Min(maxHealth, currentHealth + healAmount);
+        CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + healAmount);
 
         //unitUI.SetEnergyBarProgress(HealthRate);
     }
 
-    public void SetHealth(float health)
+    public virtual void SetHealth(float health)
     {
-        currentHealth = Mathf.Min( maxHealth, health );
+        bool dead = false;
+        if( health <= 0.0f && CurrentHealth > 0.0f )
+            dead = true;
+        CurrentHealth = Mathf.Min( maxHealth, health );
 
-        //unitUI.SetEnergyBarProgress( HealthRate );
+        if( dead )
+            Die();
+        else
+            unitUI.SetHealthBarProgress( HealthRate );
     }
-
-    public PlayerData GetPlayerData()
-    {
-        playerInfo.position = transform.position;
-        playerInfo.rotation = transform.rotation;
-        return playerInfo;
-    }
-
 
     #region Weapon functions
 

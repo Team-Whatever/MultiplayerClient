@@ -28,6 +28,7 @@ public class NetworkServer : MonoBehaviour
         m_Connections = new NativeList<NetworkConnection>( 16, Allocator.Persistent );
 
         playersManager = new PlayerUnitManager();
+        GameplayManager.Instance.IsServer = true;
     }
     void SendToClient( string message, NetworkConnection c )
     {
@@ -48,9 +49,10 @@ public class NetworkServer : MonoBehaviour
         Debug.Log( "[Server] Accepted a connection : " + c.InternalId );
         playersManager.NewPlayer( c.InternalId );
         PlayerData newPlayer = playersManager.GetPlayer( c.InternalId );
+        GameplayManager.Instance.SpawnPlayer( newPlayer, false );
 
         // Example to send a handshake message:
-        HandshakeMsg m = new HandshakeMsg( newPlayer );
+        ConnectMsg m = new ConnectMsg( newPlayer );
         SendToClient( JsonUtility.ToJson( m ), c );
     }
 
@@ -63,14 +65,15 @@ public class NetworkServer : MonoBehaviour
 
         switch( header.cmd )
         {
-            case Commands.HANDSHAKE:
-                HandshakeMsg hsMsg = JsonUtility.FromJson<HandshakeMsg>( recMsg );
+            case Commands.CONNECTED:
+                ConnectMsg hsMsg = JsonUtility.FromJson<ConnectMsg>( recMsg );
                 Debug.Log( "[Server] Handshake message received! : " + hsMsg.player.id );
                 break;
             case Commands.PLAYER_UPDATE:
                 PlayerUpdateMsg puMsg = JsonUtility.FromJson<PlayerUpdateMsg>( recMsg );
                 Debug.Log( "[Server] Player update message received! : " + puMsg.player.ToString() );
-                playersManager.UpdatePlayer( clientId, puMsg.player );
+                GameplayManager.Instance.UpdatePlayerCommands( puMsg.player, puMsg.commands );
+                //playersManager.UpdatePlayer( clientId, puMsg.player );
                 break;
             case Commands.SERVER_UPDATE:
                 ServerUpdateMsg suMsg = JsonUtility.FromJson<ServerUpdateMsg>( recMsg );
@@ -136,14 +139,14 @@ public class NetworkServer : MonoBehaviour
             }
         }
 
-        if( playersManager.IsDirtyFlag )
+        if( GameplayManager.Instance.HasClientChanged )
         {
             for( int i = 0; i < m_Connections.Length; i++ )
             {
-                ServerUpdateMsg m = new ServerUpdateMsg( playersManager.GetPlayers() );
+                ServerUpdateMsg m = new ServerUpdateMsg( GameplayManager.Instance.playersData );
                 SendToClient( JsonUtility.ToJson( m ), m_Connections[i] );
             }
-            playersManager.ClearDirtyFlag();
+            GameplayManager.Instance.HasClientChanged = false;
         }
     }
 }

@@ -12,21 +12,38 @@ public enum PlayerCommand
     MoveRight,
     RotateLeft,
     RotateRight,
+    TurnHorizontal,
     LookUp,
     LookDown,
     FireBullet,
 };
 
+[System.Serializable]
+public class PlayerCommandData
+{
+    public PlayerCommand command;
+    public float value;
+
+    public PlayerCommandData( PlayerCommand cmd )
+        : this( cmd, 0.0f )
+    {
+    }
+
+    public PlayerCommandData( PlayerCommand cmd, float val )
+    {
+        command = cmd;
+        value = val;
+    }
+}
+
 public class PlayerController : Singleton<PlayerController>
 {
     [HideInInspector] public UnitBase localPlayer;
     [HideInInspector] public bool isLocalPlayer;
+    [HideInInspector] public int localPlayerId;
     
-    public float moveSpeed;
-    public float angularSpeed;
-
     // messages to be sent to the server
-    Queue<PlayerCommand> messageQueue = new Queue<PlayerCommand>();
+    List<PlayerCommandData> commandQueue = new List<PlayerCommandData>();
     public bool IsDirtyFlag { get; private set; }
 
     public void Awake()
@@ -46,18 +63,22 @@ public class PlayerController : Singleton<PlayerController>
             if( Input.GetKey( KeyCode.W ) )
             {
                 moveVector += curTransform.forward;
+                AddCommand( PlayerCommand.MoveForward );
             }
             if( Input.GetKey( KeyCode.S ) )
             {
                 moveVector += -curTransform.forward;
+                AddCommand( PlayerCommand.MoveBackward );
             }
             if( Input.GetKey( KeyCode.A ) )
             {
-                moveVector += -curTransform.right;
+                moveVector -= curTransform.right;
+                AddCommand( PlayerCommand.MoveLeft );
             }
             if( Input.GetKey( KeyCode.D ) )
             {
                 moveVector += curTransform.right;
+                AddCommand( PlayerCommand.MoveRight );
             }
             if( moveVector != Vector3.zero )
                 localPlayer.MoveBy( moveVector );
@@ -67,20 +88,21 @@ public class PlayerController : Singleton<PlayerController>
             // mouse right drag
             if( Input.GetMouseButton( 1 ) )
             {
-                float rotation = Input.GetAxis( "Mouse X" ) * angularSpeed;
-                curTransform.Rotate( Vector3.up, rotation );
+                float axis = Input.GetAxis( "Mouse X" );
+                localPlayer.Rotate( axis );
+                AddCommand( PlayerCommand.TurnHorizontal, axis );
             }
             else
             {
                 if( Input.GetKey( KeyCode.Q ) )
                 {
-                    float rotation = Time.deltaTime * -angularSpeed;
-                    curTransform.Rotate( Vector3.up, rotation );
+                    localPlayer.Rotate( -Time.deltaTime );
+                    AddCommand( PlayerCommand.RotateLeft );
                 }
                 else if( Input.GetKey( KeyCode.E ) )
                 {
-                    float rotation = Time.deltaTime * angularSpeed;
-                    curTransform.Rotate( Vector3.up, rotation );
+                    localPlayer.Rotate( Time.deltaTime );
+                    AddCommand( PlayerCommand.RotateRight );
                 }
             }
 
@@ -90,7 +112,7 @@ public class PlayerController : Singleton<PlayerController>
             if( Input.GetKeyDown( KeyCode.Space ) )
             {
                 if( localPlayer.CanAttack() )
-                    SendCommand( PlayerCommand.FireBullet );
+                    AddCommand( PlayerCommand.FireBullet );
             }
         }
     }
@@ -102,20 +124,27 @@ public class PlayerController : Singleton<PlayerController>
         localPlayer.transform.rotation = newTransform.rotation;
     }
 
-    public void SendCommand( PlayerCommand command )
+    public void AddCommand( PlayerCommand command )
     {
-        Debug.Log( "[ " + Time.time.ToString() + "] Send command : " + command.ToString() );
-        messageQueue.Enqueue( command );
+        AddCommand( command, 0.0f );
     }
 
-    public bool HasMessage()
+    public void AddCommand( PlayerCommand command, float value )
     {
-        return messageQueue.Count > 0;
+        Debug.Log( "[ " + Time.time.ToString() + "] Send command : " + command.ToString() + ", value = " + value );
+        commandQueue.Add( new PlayerCommandData( command, value ) );
     }
 
-    public string PopMessage()
+    public bool HasCommand()
     {
-        return messageQueue.Dequeue().ToString();
+        return commandQueue.Count > 0;
+    }
+
+    public List<PlayerCommandData> PopCommands()
+    {
+        var commands = new List<PlayerCommandData>(commandQueue);
+        commandQueue.Clear();
+        return commands;
     }
 
     public void OnDead()
