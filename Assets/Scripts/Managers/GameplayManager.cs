@@ -4,19 +4,12 @@ using UnityEngine;
 
 public class GameplayManager : Singleton<GameplayManager>
 {
-    // the player(owner) of this client
-    public UnitBase playerPrefab;
-    Dictionary<int, UnitBase> playerUnits = new Dictionary<int, UnitBase>();
-    //Dictionary<int, List<PlayerCommandData>> playerCommands = new Dictionary<int, List<PlayerCommandData>>();
+    Dictionary<string, UnitBase> playerUnits = new Dictionary<string, UnitBase>();
     public List<PlayerData> playersData = new List<PlayerData>();
 
-    Dictionary<int, PlayerData> prevPlayerData = new Dictionary<int, PlayerData>();
-
+    [HideInInspector]
     public float lastUpdatedTime;
-    public float prevUpdatedTime;
-
-    public bool IsServer { get; set; }
-    public bool HasClientChanged { get; set; }
+    float prevUpdatedTime;
 
     // Start is called before the first frame update
     void Start()
@@ -34,13 +27,14 @@ public class GameplayManager : Singleton<GameplayManager>
     {
         if( playerUnits.ContainsKey( playerInfo.id ) )
         {
-            Debug.Assert( false, playerInfo.id + " player already  exist." );
+            Debug.LogWarning( playerInfo.id + " player already  exist." );
         }
         else
         {
-            UnitBase player = Instantiate( playerPrefab );
-            playersData.Add( playerInfo );
+            UnitBase player = Instantiate( PlayerUnitManager.Instance.playerPrefab );
             player.SetPlayerData( playerInfo, isLocalPlayer );
+
+            playersData.Add( playerInfo );
             playerUnits.Add( playerInfo.id, player );
 
             if( isLocalPlayer )
@@ -63,17 +57,8 @@ public class GameplayManager : Singleton<GameplayManager>
         {
             if( playerUnits.ContainsKey( playerData.id ) )
             {
-                if( playerData.id == PlayerController.Instance.localPlayerId )
-                {
-                    playerUnits[playerData.id].transform.position = playerData.position;
-                    playerUnits[playerData.id].transform.rotation = playerData.rotation;
-                }
-                else
-                {
-                    playerUnits[playerData.id].targetPosition = playerData.position;
-                    playerUnits[playerData.id].targetRotation = playerData.rotation;
-                }
-
+                playerUnits[playerData.id].UpdateTransform( playerData.position, playerData.rotation, 
+                    playerData.id == PlayerController.Instance.localPlayerId );
             }
             else
             {
@@ -94,79 +79,14 @@ public class GameplayManager : Singleton<GameplayManager>
         prevUpdatedTime = lastUpdatedTime;
     }
 
-    public void UpdatePlayerCommands( PlayerData playerData, List<PlayerCommandData> commands )
+
+    public void DisconnectPlayer( string clientId )
     {
-        // only works in server
-        if( !IsServer )
-            return;
-
-        lastUpdatedTime = Time.time;
-
-        if( playerUnits.ContainsKey( playerData.id ) )
+        if( PlayerController.Instance.localPlayerId != clientId && playerUnits.ContainsKey( clientId ) )
         {
-            foreach( var command in commands )
-                UpdatePlayerCommand( playerUnits[playerData.id], command );
-            playerUnits[playerData.id].UpdatePlayerData();
-        }
-        else
-        {
-            Debug.LogWarning( "Player not found, respawn it " + playerData.id );
-            SpawnPlayer( playerData, false );
-        }
-
-        HasClientChanged = true;
-        prevUpdatedTime = lastUpdatedTime;
-    }
-
-    void UpdatePlayerCommand( UnitBase unit, PlayerCommandData cmd )
-    {
-        // only works in server
-        if( !IsServer )
-            return;
-
-        switch( cmd.command )
-        {
-            case PlayerCommand.MoveForward:
-                unit.MoveBy( unit.transform.forward );
-                break;
-            case PlayerCommand.MoveBackward:
-                unit.MoveBy( -unit.transform.forward );
-                break;
-            case PlayerCommand.MoveLeft:
-                unit.MoveBy( -unit.transform.right );
-                break;
-            case PlayerCommand.MoveRight:
-                unit.MoveBy( unit.transform.right );
-                break;
-            case PlayerCommand.RotateLeft:
-                unit.Rotate( -Time.fixedDeltaTime );
-                break;
-            case PlayerCommand.RotateRight:
-                unit.Rotate( Time.fixedDeltaTime );
-                break;
-            case PlayerCommand.TurnHorizontal:
-                unit.Rotate( cmd.value );
-                break;
-            case PlayerCommand.LookUp:
-                break;
-            case PlayerCommand.LookDown:
-                break;
-            case PlayerCommand.FireBullet:
-                unit.FireBullet();
-                break;
-            default:
-                Debug.Assert( false, "TODO: Missing command : " + cmd.command.ToString() );
-                break;
-        }
-    }
-
-    public void DisconnectPlayer( int playerId )
-    {
-        if( playerUnits.ContainsKey( playerId ) )
-        {
-            playersData.Remove( playerUnits[playerId].GetPlayerData() );
-            playerUnits.Remove( playerId );
-            Destroy( playerUnits[playerId].gameObject );
+            playersData.Remove( playerUnits[clientId].GetPlayerData() );
+            playerUnits.Remove( clientId );
+            Destroy( playerUnits[clientId].gameObject );
         }
     }
 

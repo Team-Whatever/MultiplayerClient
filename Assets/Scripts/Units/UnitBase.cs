@@ -67,11 +67,11 @@ public class UnitBase : StateMachine
     /// Identification
     /// </summary>
     public bool IsLocalPlayer { get; set; }
-    public int PlayerId
+    public string PlayerId
     {
         get
         {
-            return playerInfo != null ? playerInfo.id : -1;
+            return playerInfo != null ? playerInfo.id : string.Empty;
         }
     }
     public int TeamId
@@ -208,6 +208,16 @@ public class UnitBase : StateMachine
         }
         else
         {
+            float timeElapsed = Mathf.Clamp( Time.time - GameplayManager.Instance.lastUpdatedTime, 0.0f, 1.0f );
+            if( targetPosition.HasValue )
+            {
+                transform.position = Vector3.Lerp( transform.position, targetPosition.Value, timeElapsed );
+            }
+            if( targetRotation.HasValue )
+            {
+                transform.rotation = Quaternion.Lerp( transform.rotation, targetRotation.Value, timeElapsed );
+            }
+
             if( unitUI )
                 unitUI.gameObject.transform.rotation = Camera.main.transform.rotation;
         }
@@ -269,6 +279,8 @@ public class UnitBase : StateMachine
     public void SetPlayerData( PlayerData data, bool isLocal )
     {
         playerInfo = data;
+        SetModel( data.unitId );
+
         if( unitUI )
             unitUI.SetUserData( data.id, isLocal );
 
@@ -297,6 +309,29 @@ public class UnitBase : StateMachine
         playerInfo.position = transform.position;
         playerInfo.rotation = transform.rotation;
         playerInfo.lastUpdateTime = Time.time;
+    }
+
+    public void UpdateTransform( Vector3 position, Quaternion rotation, bool isLocalPlayer )
+    {
+        if( isLocalPlayer )
+        {
+            transform.position = position;
+            transform.rotation = rotation;
+            UpdatePlayerData();
+        }
+        else
+        {
+            targetPosition = position;
+            targetRotation = rotation;
+        }
+    }
+
+    void SetModel( int unitId )
+    {
+        for( int i = 0; i < unitModels.Length; i++ )
+        {
+            unitModels[i].SetActive( i == unitId );
+        }
     }
 
     #endregion

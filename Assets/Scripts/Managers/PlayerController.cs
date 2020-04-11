@@ -40,7 +40,7 @@ public class PlayerController : Singleton<PlayerController>
 {
     [HideInInspector] public UnitBase localPlayer;
     [HideInInspector] public bool isLocalPlayer;
-    [HideInInspector] public int localPlayerId;
+    [HideInInspector] public string localPlayerId;
     
     // messages to be sent to the server
     List<PlayerCommandData> commandQueue = new List<PlayerCommandData>();
@@ -89,19 +89,22 @@ public class PlayerController : Singleton<PlayerController>
             if( Input.GetMouseButton( 1 ) )
             {
                 float axis = Input.GetAxis( "Mouse X" );
-                localPlayer.Rotate( axis );
-                AddCommand( PlayerCommand.TurnHorizontal, axis );
+                if( axis != 0.0 )
+                {
+                    localPlayer.Rotate( axis );
+                    AddCommand( PlayerCommand.TurnHorizontal, axis );
+                }
             }
             else
             {
                 if( Input.GetKey( KeyCode.Q ) )
                 {
-                    localPlayer.Rotate( -Time.deltaTime );
+                    localPlayer.Rotate( -Time.fixedDeltaTime );
                     AddCommand( PlayerCommand.RotateLeft );
                 }
                 else if( Input.GetKey( KeyCode.E ) )
                 {
-                    localPlayer.Rotate( Time.deltaTime );
+                    localPlayer.Rotate( Time.fixedDeltaTime );
                     AddCommand( PlayerCommand.RotateRight );
                 }
             }

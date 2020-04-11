@@ -12,6 +12,7 @@ public class NetworkServer : MonoBehaviour
     public NetworkDriver m_Driver;
     public ushort serverPort;
     private NativeList<NetworkConnection> m_Connections;
+    Dictionary<NetworkConnection, string> m_ClientIds;
 
     private PlayerUnitManager playersManager;
 
@@ -26,9 +27,9 @@ public class NetworkServer : MonoBehaviour
             m_Driver.Listen();
 
         m_Connections = new NativeList<NetworkConnection>( 16, Allocator.Persistent );
+        m_ClientIds = new Dictionary<NetworkConnection, string>();
 
         playersManager = new PlayerUnitManager();
-        GameplayManager.Instance.IsServer = true;
     }
     void SendToClient( string message, NetworkConnection c )
     {
@@ -37,6 +38,7 @@ public class NetworkServer : MonoBehaviour
         writer.WriteBytes( bytes );
         m_Driver.EndSend( writer );
     }
+
     public void OnDestroy()
     {
         m_Driver.Dispose();
@@ -47,16 +49,9 @@ public class NetworkServer : MonoBehaviour
     {
         m_Connections.Add( c );
         Debug.Log( "[Server] Accepted a connection : " + c.InternalId );
-        playersManager.NewPlayer( c.InternalId );
-        PlayerData newPlayer = playersManager.GetPlayer( c.InternalId );
-        GameplayManager.Instance.SpawnPlayer( newPlayer, false );
-
-        // Example to send a handshake message:
-        ConnectMsg m = new ConnectMsg( newPlayer );
-        SendToClient( JsonUtility.ToJson( m ), c );
     }
 
-    void OnData( DataStreamReader stream, int clientId )
+    void OnData( int i, DataStreamReader stream )
     {
         NativeArray<byte> bytes = new NativeArray<byte>( stream.Length, Allocator.Temp );
         stream.ReadBytes( bytes );
@@ -65,15 +60,15 @@ public class NetworkServer : MonoBehaviour
 
         switch( header.cmd )
         {
-            case Commands.CONNECTED:
-                ConnectMsg hsMsg = JsonUtility.FromJson<ConnectMsg>( recMsg );
-                Debug.Log( "[Server] Handshake message received! : " + hsMsg.player.id );
+            case Commands.LOGIN:
+                LoginMsg lMsg = JsonUtility.FromJson<LoginMsg>( recMsg );
+                Debug.Log( "[Server] Client login message received! : " + lMsg.clientId);
+                OnClientLogIn( i, lMsg.clientId );
                 break;
             case Commands.PLAYER_UPDATE:
                 PlayerUpdateMsg puMsg = JsonUtility.FromJson<PlayerUpdateMsg>( recMsg );
                 Debug.Log( "[Server] Player update message received! : " + puMsg.player.ToString() );
-                GameplayManager.Instance.UpdatePlayerCommands( puMsg.player, puMsg.commands );
-                //playersManager.UpdatePlayer( clientId, puMsg.player );
+                GameServerManager.Instance.UpdatePlayerCommands( puMsg.player, puMsg.commands );
                 break;
             case Commands.SERVER_UPDATE:
                 ServerUpdateMsg suMsg = JsonUtility.FromJson<ServerUpdateMsg>( recMsg );
@@ -85,12 +80,29 @@ public class NetworkServer : MonoBehaviour
         }
     }
 
+    void OnClientLogIn( int i, string clientId )
+    {
+        m_ClientIds.Add( m_Connections[i], clientId );
+        PlayerData playerData = GameServerManager.Instance.SpawnPlayer( clientId );
+
+        if( playerData != null )
+        {
+            PlayerSpawnMsg msg = new PlayerSpawnMsg( clientId, playerData );
+            SendToClient( JsonUtility.ToJson( msg ), m_Connections[i] );
+        }
+    }
+
     void OnDisconnect( int i )
     {
-        Debug.Log( "[Server] Client disconnected from server" );
-        playersManager.RemovePlayer( m_Connections[i].InternalId );
-        m_Connections[i] = default( NetworkConnection );
+        Debug.Log( "[Server] Client disconnected from server : " + i );
+        if( i < m_Connections.Length )
+        {
+            RemovePlayer( m_Connections[i] );
+            m_Connections[i] = default( NetworkConnection );
+        }
     }
+
+
 
     void Update()
     {
@@ -101,8 +113,8 @@ public class NetworkServer : MonoBehaviour
         {
             if( !m_Connections[i].IsCreated )
             {
+                RemovePlayer( m_Connections[i] );
                 m_Connections.RemoveAtSwapBack( i );
-                playersManager.RemovePlayer( m_Connections[i].InternalId );
                 --i;
             }
         }
@@ -128,7 +140,7 @@ public class NetworkServer : MonoBehaviour
             {
                 if( cmd == NetworkEvent.Type.Data )
                 {
-                    OnData( stream, m_Connections[i].InternalId );
+                    OnData( i, stream );
                 }
                 else if( cmd == NetworkEvent.Type.Disconnect )
                 {
@@ -139,14 +151,28 @@ public class NetworkServer : MonoBehaviour
             }
         }
 
-        if( GameplayManager.Instance.HasClientChanged )
+        if( GameServerManager.Instance.HasClientChanged )
         {
             for( int i = 0; i < m_Connections.Length; i++ )
             {
-                ServerUpdateMsg m = new ServerUpdateMsg( GameplayManager.Instance.playersData );
+                ServerUpdateMsg m = new ServerUpdateMsg( GameServerManager.Instance.playersData );
                 SendToClient( JsonUtility.ToJson( m ), m_Connections[i] );
             }
-            GameplayManager.Instance.HasClientChanged = false;
+            GameServerManager.Instance.HasClientChanged = false;
+        }
+    }
+
+    void RemovePlayer( NetworkConnection c )
+    {
+        if( m_ClientIds.ContainsKey( c ) )
+        {
+            string clientId = m_ClientIds[c];
+            playersManager.RemovePlayer( clientId );
+            m_ClientIds.Remove( c );
+        }
+        else
+        {
+            Debug.LogWarning( "[Server] Client not found : " + c.InternalId );
         }
     }
 }

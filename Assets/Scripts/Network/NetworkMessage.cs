@@ -8,30 +8,61 @@ namespace NetworkMessages
     public enum Commands
     {
         CONNECTED,
+        LOGIN,
+        PLAYER_SPAWNED,
         PLAYER_UPDATE,
         SERVER_UPDATE,
     }
     [System.Serializable]
     public class NetworkHeader
     {
+        public string clientId;
         public Commands cmd;
+        public NetworkHeader( string id )
+        {
+            clientId = id;
+        }
     }
+    
     [System.Serializable]
     public class ConnectMsg : NetworkHeader
     {
-        public PlayerData player;
-        public ConnectMsg( PlayerData data )
+        public ConnectMsg()
+            : base( string.Empty )
         {      // Constructor
             cmd = Commands.CONNECTED;
+        }
+    }
+
+    [System.Serializable]
+    public class LoginMsg : NetworkHeader
+    {
+        public LoginMsg( string id )
+            :base( id )
+        {      // Constructor
+            cmd = Commands.LOGIN;
+        }
+    }
+
+    [System.Serializable]
+    public class PlayerSpawnMsg : NetworkHeader
+    {
+        public PlayerData player;
+        public PlayerSpawnMsg( string id, PlayerData data )
+            : base( id )
+        {      // Constructor
+            cmd = Commands.PLAYER_SPAWNED;
             player = data;
         }
     }
+
     [System.Serializable]
     public class PlayerUpdateMsg : NetworkHeader
     {
         public PlayerData player;
         public List<PlayerCommandData> commands;
-        public PlayerUpdateMsg( PlayerData data, List<PlayerCommandData> cmds )
+        public PlayerUpdateMsg( string id, PlayerData data, List<PlayerCommandData> cmds )
+            : base( id )
         {      // Constructor
             cmd = Commands.PLAYER_UPDATE;
             player = data;
@@ -42,12 +73,11 @@ namespace NetworkMessages
     public class ServerUpdateMsg : NetworkHeader
     {
         public List<PlayerData> players;
-        //public List<PlayerCommandData> commands;
         public ServerUpdateMsg( List<PlayerData> data/*, List<PlayerCommandData> cmds*/ )
+            : base( string.Empty )
         {      // Constructor
             cmd = Commands.SERVER_UPDATE;
             players = data;
-            //commands = cmds;
         }
     }
 }

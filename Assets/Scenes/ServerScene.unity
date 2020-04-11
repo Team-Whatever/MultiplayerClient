@@ -120,7 +120,7 @@ NavMeshSettings:
     accuratePlacement: 0
     debug:
       m_Flags: 0
-  m_NavMeshData: {fileID: 23800000, guid: 21275113df35e0e4c8260586375cd77e, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 3d11c87cabc5ab44ca6ca70430e21ef2, type: 2}
 --- !u!1001 &1823017
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8541,13 +8541,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 969734002}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 3.15, z: 8.48}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1001 &972926279
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10416,7 +10416,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1197919398}
   - component: {fileID: 1197919396}
-  - component: {fileID: 1197919399}
   m_Layer: 0
   m_Name: GameControllers
   m_TagString: Untagged
@@ -10433,14 +10432,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1197919395}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a94b9262a66a4614c865f89a8ba70422, type: 3}
+  m_Script: {fileID: 11500000, guid: 7c55b738348508040980c1bb4c7c06e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 1775839585378489473, guid: c742f0196e0378e4c8c8e811b678f068,
     type: 3}
-  playersData: []
-  lastUpdatedTime: 0
-  prevUpdatedTime: 0
 --- !u!4 &1197919398
 Transform:
   m_ObjectHideFlags: 0
@@ -10455,21 +10451,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1197919399
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1197919395}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a217f5f1fa1291242ad9b1fa3f0c1695, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  localPlayer: {fileID: 0}
-  isLocalPlayer: 0
-  localPlayerId: 0
 --- !u!1001 &1208239923
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13687,6 +13668,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1616199973}
   - component: {fileID: 1616199972}
+  - component: {fileID: 1616199974}
   m_Layer: 0
   m_Name: GameServer
   m_TagString: Untagged
@@ -13721,6 +13703,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1616199974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1616199971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32d830c2edbfe10478e5d73537d0cc22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playersData: []
 --- !u!1001 &1617503772
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -4,7 +4,7 @@ using UnityEngine;
 [System.Serializable]
 public class PlayerData
 {
-    public int id;
+    public string id;
     public int unitId;
     public int teamId;
 
@@ -15,7 +15,7 @@ public class PlayerData
     public float health;
     public float lastUpdateTime;
 
-    public PlayerData( int _id, int _unitId, float maxHealth )
+    public PlayerData( string _id, int _unitId, float maxHealth )
     {
         id = _id;
         unitId = _unitId;

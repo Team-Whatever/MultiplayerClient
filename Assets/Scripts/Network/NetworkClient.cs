@@ -11,6 +11,7 @@ public class NetworkClient : MonoBehaviour
     public NetworkConnection m_Connection;
     public string serverIP = "3.219.69.41";
     public ushort serverPort = 12346;
+    public string clientId;
     float lastTimestamp;
 
     void Start()
@@ -19,7 +20,6 @@ public class NetworkClient : MonoBehaviour
         m_Connection = default( NetworkConnection );
         var endpoint = NetworkEndPoint.Parse( serverIP, serverPort );
         m_Connection = m_Driver.Connect( endpoint );
-        GameplayManager.Instance.IsServer = false;
     }
 
     void SendToServer( string message )
@@ -35,12 +35,14 @@ public class NetworkClient : MonoBehaviour
 
     void OnConnect()
     {
-        Debug.Log( "[Client] We are now connected to the server : " + m_Connection.InternalId );
+        // TEMP : until we gets id from the database
+        clientId = Guid.NewGuid().ToString();
+
+        Debug.Log( "[Client] now connected to the server : " + clientId );
 
         // Example to send a handshake message:
-        //HandshakeMsg m = new HandshakeMsg();
-        //m.player.id = m_Connection.InternalId.ToString();
-        //SendToServer(JsonUtility.ToJson(m));
+        LoginMsg m = new LoginMsg( clientId );
+        SendToServer( JsonUtility.ToJson( m ) );
     }
 
     void OnData( DataStreamReader stream )
@@ -53,9 +55,17 @@ public class NetworkClient : MonoBehaviour
         switch( header.cmd )
         {
             case Commands.CONNECTED:
-                ConnectMsg hsMsg = JsonUtility.FromJson<ConnectMsg>( recMsg );
-                Debug.Log( "[Client] Handshake message received! " + hsMsg.player.id );
-                GameplayManager.Instance.SpawnPlayer( hsMsg.player, true );
+                ConnectMsg cMsg = JsonUtility.FromJson<ConnectMsg>( recMsg );
+                Debug.Log( "[Client] Client connected to the server : " + clientId );
+                break;
+            case Commands.LOGIN:
+                LoginMsg lMsg = JsonUtility.FromJson<LoginMsg>( recMsg );
+                Debug.Log( "[Client] Client logged in to the server : " + lMsg.clientId );
+                break;
+            case Commands.PLAYER_SPAWNED:
+                PlayerSpawnMsg psMsg = JsonUtility.FromJson<PlayerSpawnMsg>( recMsg );
+                Debug.Log( "[Client] Player Spawn message received! " + psMsg.player.id );
+                GameplayManager.Instance.SpawnPlayer( psMsg.player, true );
                 break;
             case Commands.PLAYER_UPDATE:
                 PlayerUpdateMsg puMsg = JsonUtility.FromJson<PlayerUpdateMsg>( recMsg );
@@ -130,7 +140,7 @@ public class NetworkClient : MonoBehaviour
             // send data at least once in two seconds
             if( PlayerController.Instance.HasCommand() || Time.time - lastTimestamp > 2.0 )
             {
-                PlayerUpdateMsg puMsg = new PlayerUpdateMsg( localPlayer.GetPlayerData(), PlayerController.Instance.PopCommands() );
+                PlayerUpdateMsg puMsg = new PlayerUpdateMsg( clientId, localPlayer.GetPlayerData(), PlayerController.Instance.PopCommands() );
                 SendToServer( JsonUtility.ToJson( puMsg ) );
                 PlayerController.Instance.ClearDirtyFlag();
             }

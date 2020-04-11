@@ -6,8 +6,11 @@ using UnityEngine;
 public class PlayerUnitManager : Singleton<PlayerUnitManager>
 {
     List<PlayerData> players = new List<PlayerData>();
-    Dictionary<int, PlayerData> playersDict = new Dictionary<int, PlayerData>();
-    public List<int> unitModels;
+    Dictionary<string, PlayerData> playersDict = new Dictionary<string, PlayerData>();
+
+    public UnitBase playerPrefab;
+    List<int> unitModelIDs;
+    List<int> usedModelIDs = new List<int>();
 
     // indicate whther to update a player information to the other clients
     public bool IsDirtyFlag { get; private set; }
@@ -22,31 +25,38 @@ public class PlayerUnitManager : Singleton<PlayerUnitManager>
         get { return players.Count; }
     }
 
-    public PlayerUnitManager()
+    void Awake()
     {
-        unitModels = Enumerable.Range( 0, MaxUnitTypes ).OrderBy( x => Random.value ).ToList();
+        unitModelIDs = Enumerable.Range( 0, MaxUnitTypes ).OrderBy( x => Random.value ).ToList();
     }
 
-    public bool NewPlayer( int id )
+    public PlayerData NewPlayer( string id )
     {
         if( playersDict.ContainsKey( id ) )
         {
             Debug.LogWarning( "Player already exist : " + id.ToString() );
-            return false;
+            return playersDict[id];
         }
 
-        int modelId = 0;
-        if( id < unitModels.Count )
-            modelId = unitModels[id];
+        if( unitModelIDs.Count == 0 )
+        {
+            unitModelIDs.AddRange( usedModelIDs );
+            usedModelIDs.Clear();
+        }
+        
+        // get from the last due to the performace of the list
+        int modelId = unitModelIDs[unitModelIDs.Count - 1];
+        usedModelIDs.Add( modelId );
+        unitModelIDs.RemoveAt( unitModelIDs.Count - 1 );
 
         var newPlayer = new PlayerData( id, modelId, MaxHealth );
         players.Add( newPlayer );
         playersDict.Add( id, newPlayer );
         
-        return true;
+        return newPlayer;
     }
 
-    public void RemovePlayer( int id )
+    public void RemovePlayer( string id )
     {
         if( playersDict.ContainsKey( id ) )
         {
@@ -59,13 +69,14 @@ public class PlayerUnitManager : Singleton<PlayerUnitManager>
         }
     }
 
-    public void UpdatePlayer( int id, PlayerData data )
+    public void UpdatePlayer( string id, PlayerData data )
     {
         if( playersDict.ContainsKey( id ) )
         {
-            //int idx = players.IndexOf( playersDict[id] );
+            int idx = players.IndexOf( playersDict[id] );
             //players[idx] = data;
             playersDict[id] = data;
+            Debug.Assert( players[idx] == playersDict[id], "List and the Dictionary should be identical" );
             
             IsDirtyFlag = true;
         }
@@ -75,7 +86,7 @@ public class PlayerUnitManager : Singleton<PlayerUnitManager>
         }
     }
 
-    public PlayerData GetPlayer( int id )
+    public PlayerData GetPlayer( string id )
     {
         if( playersDict.ContainsKey( id ) )
         {

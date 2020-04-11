@@ -12,11 +12,11 @@ public class PlayerUI : MonoBehaviour
     public TextMeshProUGUI clientIdText;
     public Slider healthBar;
 
-    public void SetUserData( int clientId, bool isLocalPlayer )
+    public void SetUserData( string clientId, bool isLocalPlayer )
     {
         if( clientIdText != null )
         {
-            clientIdText.text = clientId.ToString();
+            clientIdText.text = clientId.Substring( 0, 6 );
             clientIdText.color = isLocalPlayer ? Color.red : Color.gray;
         }
     }
