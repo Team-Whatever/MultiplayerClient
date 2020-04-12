@@ -21,16 +21,18 @@ public enum PlayerCommand
 [System.Serializable]
 public class PlayerCommandData
 {
+    public string playerId;
     public PlayerCommand command;
     public float value;
 
-    public PlayerCommandData( PlayerCommand cmd )
-        : this( cmd, 0.0f )
+    public PlayerCommandData( string id, PlayerCommand cmd )
+        : this( id, cmd, 0.0f )
     {
     }
 
-    public PlayerCommandData( PlayerCommand cmd, float val )
+    public PlayerCommandData( string id, PlayerCommand cmd, float val )
     {
+        playerId = id;
         command = cmd;
         value = val;
     }
@@ -44,7 +46,6 @@ public class PlayerController : Singleton<PlayerController>
     
     // messages to be sent to the server
     List<PlayerCommandData> commandQueue = new List<PlayerCommandData>();
-    public bool IsDirtyFlag { get; private set; }
 
     public void Awake()
     {
@@ -63,68 +64,72 @@ public class PlayerController : Singleton<PlayerController>
             if( Input.GetKey( KeyCode.W ) )
             {
                 moveVector += curTransform.forward;
-                AddCommand( PlayerCommand.MoveForward );
             }
             if( Input.GetKey( KeyCode.S ) )
             {
-                moveVector += -curTransform.forward;
-                AddCommand( PlayerCommand.MoveBackward );
+                moveVector -= curTransform.forward;
             }
             if( Input.GetKey( KeyCode.A ) )
             {
                 moveVector -= curTransform.right;
-                AddCommand( PlayerCommand.MoveLeft );
             }
             if( Input.GetKey( KeyCode.D ) )
             {
                 moveVector += curTransform.right;
-                AddCommand( PlayerCommand.MoveRight );
             }
-            if( moveVector != Vector3.zero )
-                localPlayer.MoveBy( moveVector );
-            else
-                localPlayer.StopMove();
 
             // mouse right drag
+            float rotationValue = 0.0f;
             if( Input.GetMouseButton( 1 ) )
             {
-                float axis = Input.GetAxis( "Mouse X" );
-                if( axis != 0.0 )
-                {
-                    localPlayer.Rotate( axis );
-                    AddCommand( PlayerCommand.TurnHorizontal, axis );
-                }
+                rotationValue = Input.GetAxis( "Mouse X" );
             }
             else
             {
                 if( Input.GetKey( KeyCode.Q ) )
                 {
-                    localPlayer.Rotate( -Time.fixedDeltaTime );
-                    AddCommand( PlayerCommand.RotateLeft );
+                    rotationValue += -Time.fixedDeltaTime;
                 }
                 else if( Input.GetKey( KeyCode.E ) )
                 {
-                    localPlayer.Rotate( Time.fixedDeltaTime );
-                    AddCommand( PlayerCommand.RotateRight );
+                    rotationValue += Time.fixedDeltaTime;
                 }
             }
-
-            StartCoroutine( UpdateTransform( curTransform, 0.0f ) );
-
+            StartCoroutine( ASyncUpdateTransform( localPlayer, moveVector, rotationValue, GameplayManager.estimatedLag ) );
 
             if( Input.GetKeyDown( KeyCode.Space ) )
             {
                 if( localPlayer.CanAttack() )
+                {
                     AddCommand( PlayerCommand.FireBullet );
+                    StartCoroutine( AsyncFireBullet( localPlayer, GameplayManager.estimatedLag ) );
+                }
             }
         }
     }
 
-    IEnumerator UpdateTransform( Transform newTransform, float waitingTime )
+    IEnumerator ASyncUpdateTransform( UnitBase unit, Vector3 moveVector, float rotation, float waitingTime )
     {
         yield return new WaitForSeconds( waitingTime );
-        localPlayer.transform.position = newTransform.position;
-        localPlayer.transform.rotation = newTransform.rotation;
+        if( moveVector != Vector3.zero )
+        {
+            unit.MoveBy( moveVector );
+        }
+        else
+        {
+            unit.StopMove();
+        }
+
+        if( rotation != 0.0f )
+        {
+            unit.Rotate( rotation );
+        }
+    }
+
+    IEnumerator AsyncFireBullet( UnitBase unit, float lagTime )
+    {
+        yield return new WaitForSeconds( lagTime );
+        unit.FireBullet();
     }
 
     public void AddCommand( PlayerCommand command )
@@ -135,7 +140,7 @@ public class PlayerController : Singleton<PlayerController>
     public void AddCommand( PlayerCommand command, float value )
     {
         Debug.Log( "[ " + Time.time.ToString() + "] Send command : " + command.ToString() + ", value = " + value );
-        commandQueue.Add( new PlayerCommandData( command, value ) );
+        commandQueue.Add( new PlayerCommandData( localPlayerId, command, value ) );
     }
 
     public bool HasCommand()
@@ -161,10 +166,5 @@ public class PlayerController : Singleton<PlayerController>
 
         // TODO : find player respawning point
         //localPlayer.transform.position = playerSpawner.transform.position;
-    }
-
-    public void ClearDirtyFlag()
-    {
-        IsDirtyFlag = false;
     }
 }

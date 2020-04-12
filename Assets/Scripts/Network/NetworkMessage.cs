@@ -73,11 +73,13 @@ namespace NetworkMessages
     public class ServerUpdateMsg : NetworkHeader
     {
         public List<PlayerData> players;
-        public ServerUpdateMsg( List<PlayerData> data/*, List<PlayerCommandData> cmds*/ )
+        public List<PlayerCommandData> playerCommands;
+        public ServerUpdateMsg( List<PlayerData> data, List<PlayerCommandData> commands )
             : base( string.Empty )
         {      // Constructor
             cmd = Commands.SERVER_UPDATE;
             players = data;
+            playerCommands = commands;
         }
     }
 }

@@ -6,6 +6,7 @@ public class GameServerManager : Singleton<GameServerManager>
 {
     // have dictionary and the list together for the performance
     public List<PlayerData> playersData = new List<PlayerData>();
+    public List<PlayerCommandData> playersCommands = new List<PlayerCommandData>();
     Dictionary<string, PlayerData> playersDataDict = new Dictionary<string, PlayerData>();
 
     Dictionary<string, PlayerData> prevPlayerData = new Dictionary<string, PlayerData>();
@@ -15,7 +16,6 @@ public class GameServerManager : Singleton<GameServerManager>
     public float lastUpdatedTime;
     float prevUpdatedTime;
     public bool HasClientChanged { get; set; }
-
 
     public PlayerData SpawnPlayer( string clientId )
     {
@@ -44,9 +44,14 @@ public class GameServerManager : Singleton<GameServerManager>
 
         if( playerUnits.ContainsKey( playerData.id ) )
         {
+            if( playerUnits[playerData.id].transform.position != playerData.position )
+                Debug.Log( "position needs to be updated" );
+            playerUnits[playerData.id].transform.position = playerData.position;
+            playerUnits[playerData.id].transform.rotation = playerData.rotation;
+            playersDataDict[playerData.id].position = playerData.position;
+            playersDataDict[playerData.id].rotation = playerData.rotation;
             foreach( var command in commands )
                 UpdatePlayerCommand( playerUnits[playerData.id], command );
-            playerUnits[playerData.id].UpdatePlayerData();
         }
         else
         {
@@ -63,33 +68,13 @@ public class GameServerManager : Singleton<GameServerManager>
         Debug.Log( "Player " + unit.PlayerId + " " + cmd.command.ToString() + " , value = " + cmd.value );
         switch( cmd.command )
         {
-            case PlayerCommand.MoveForward:
-                unit.MoveBy( unit.transform.forward );
-                break;
-            case PlayerCommand.MoveBackward:
-                unit.MoveBy( -unit.transform.forward );
-                break;
-            case PlayerCommand.MoveLeft:
-                unit.MoveBy( -unit.transform.right );
-                break;
-            case PlayerCommand.MoveRight:
-                unit.MoveBy( unit.transform.right );
-                break;
-            case PlayerCommand.RotateLeft:
-                unit.Rotate( -Time.fixedDeltaTime );
-                break;
-            case PlayerCommand.RotateRight:
-                unit.Rotate( Time.fixedDeltaTime );
-                break;
-            case PlayerCommand.TurnHorizontal:
-                unit.Rotate( cmd.value );
-                break;
             case PlayerCommand.LookUp:
                 break;
             case PlayerCommand.LookDown:
                 break;
             case PlayerCommand.FireBullet:
                 unit.FireBullet();
+                playersCommands.Add( cmd );
                 break;
             default:
                 Debug.Assert( false, "TODO: Missing command : " + cmd.command.ToString() );

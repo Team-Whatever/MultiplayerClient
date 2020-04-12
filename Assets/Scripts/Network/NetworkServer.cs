@@ -13,8 +13,7 @@ public class NetworkServer : MonoBehaviour
     public ushort serverPort;
     private NativeList<NetworkConnection> m_Connections;
     Dictionary<NetworkConnection, string> m_ClientIds;
-
-    private PlayerUnitManager playersManager;
+    float lastSentTime;
 
     void Start()
     {
@@ -28,8 +27,6 @@ public class NetworkServer : MonoBehaviour
 
         m_Connections = new NativeList<NetworkConnection>( 16, Allocator.Persistent );
         m_ClientIds = new Dictionary<NetworkConnection, string>();
-
-        playersManager = new PlayerUnitManager();
     }
     void SendToClient( string message, NetworkConnection c )
     {
@@ -104,7 +101,7 @@ public class NetworkServer : MonoBehaviour
 
 
 
-    void Update()
+    void FixedUpdate()
     {
         m_Driver.ScheduleUpdate().Complete();
 
@@ -151,14 +148,16 @@ public class NetworkServer : MonoBehaviour
             }
         }
 
-        if( GameServerManager.Instance.HasClientChanged )
+        if( GameServerManager.Instance.HasClientChanged || Time.time - lastSentTime > 0.05f )
         {
             for( int i = 0; i < m_Connections.Length; i++ )
             {
-                ServerUpdateMsg m = new ServerUpdateMsg( GameServerManager.Instance.playersData );
+                ServerUpdateMsg m = new ServerUpdateMsg( GameServerManager.Instance.playersData, GameServerManager.Instance.playersCommands );
                 SendToClient( JsonUtility.ToJson( m ), m_Connections[i] );
+                GameServerManager.Instance.playersCommands.Clear();
             }
             GameServerManager.Instance.HasClientChanged = false;
+            lastSentTime = Time.time;
         }
     }
 
@@ -167,7 +166,6 @@ public class NetworkServer : MonoBehaviour
         if( m_ClientIds.ContainsKey( c ) )
         {
             string clientId = m_ClientIds[c];
-            playersManager.RemovePlayer( clientId );
             m_ClientIds.Remove( c );
         }
         else

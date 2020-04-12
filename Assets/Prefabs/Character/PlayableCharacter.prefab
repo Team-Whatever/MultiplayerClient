@@ -966,6 +966,11 @@ PrefabInstance:
       propertyPath: ammoSlot
       value: 
       objectReference: {fileID: 1274431571603426634}
+    - target: {fileID: 1101341290434272146, guid: 89b8c427d1e76e740abd680b5fd19fa4,
+        type: 3}
+      propertyPath: bulletSpeed
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 1612641654151786715, guid: 89b8c427d1e76e740abd680b5fd19fa4,
         type: 3}
       propertyPath: m_Layer
@@ -1016,6 +1021,11 @@ PrefabInstance:
       propertyPath: ammoSlot
       value: 
       objectReference: {fileID: 1274431571603426634}
+    - target: {fileID: 2329150520164992228, guid: 89b8c427d1e76e740abd680b5fd19fa4,
+        type: 3}
+      propertyPath: bulletSpeed
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 2352131427130982389, guid: 89b8c427d1e76e740abd680b5fd19fa4,
         type: 3}
       propertyPath: ammoSlot
@@ -1024,7 +1034,12 @@ PrefabInstance:
     - target: {fileID: 2352131427130982389, guid: 89b8c427d1e76e740abd680b5fd19fa4,
         type: 3}
       propertyPath: bulletSpeed
-      value: 10
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 2352131427130982389, guid: 89b8c427d1e76e740abd680b5fd19fa4,
+        type: 3}
+      propertyPath: criticalChance
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 2771417541211548218, guid: 89b8c427d1e76e740abd680b5fd19fa4,
         type: 3}

@@ -12,9 +12,6 @@ public class PlayerUnitManager : Singleton<PlayerUnitManager>
     List<int> unitModelIDs;
     List<int> usedModelIDs = new List<int>();
 
-    // indicate whther to update a player information to the other clients
-    public bool IsDirtyFlag { get; private set; }
-
     // TODO : get the number from actual unit model;
     public static int MaxUnitTypes { get { return 10; } }
     public static float MaxHealth { get { return 100.0f; } }
@@ -77,8 +74,6 @@ public class PlayerUnitManager : Singleton<PlayerUnitManager>
             //players[idx] = data;
             playersDict[id] = data;
             Debug.Assert( players[idx] == playersDict[id], "List and the Dictionary should be identical" );
-            
-            IsDirtyFlag = true;
         }
         else
         {
@@ -97,11 +92,6 @@ public class PlayerUnitManager : Singleton<PlayerUnitManager>
             Debug.LogWarning( "Player not found : " + id.ToString() );
             return null;
         }
-    }
-
-    public void ClearDirtyFlag()
-    {
-        IsDirtyFlag = false;
     }
 
     public List<PlayerData> GetPlayers()

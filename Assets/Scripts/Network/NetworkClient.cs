@@ -74,7 +74,7 @@ public class NetworkClient : MonoBehaviour
             case Commands.SERVER_UPDATE:
                 ServerUpdateMsg suMsg = JsonUtility.FromJson<ServerUpdateMsg>( recMsg );
                 Debug.Log( "[Client] Server update message received!" + suMsg.players.ToArrayString() );
-                GameplayManager.Instance.UpdatePlayers( suMsg.players );
+                GameplayManager.Instance.UpdatePlayers( suMsg.players, suMsg.playerCommands );
                 break;
             default:
                 Debug.Log( "[Client] Unrecognized message received!" );
@@ -140,9 +140,9 @@ public class NetworkClient : MonoBehaviour
             // send data at least once in two seconds
             if( PlayerController.Instance.HasCommand() || Time.time - lastTimestamp > 2.0 )
             {
+                localPlayer.ValidatePlayerData();
                 PlayerUpdateMsg puMsg = new PlayerUpdateMsg( clientId, localPlayer.GetPlayerData(), PlayerController.Instance.PopCommands() );
                 SendToServer( JsonUtility.ToJson( puMsg ) );
-                PlayerController.Instance.ClearDirtyFlag();
             }
         }
     }

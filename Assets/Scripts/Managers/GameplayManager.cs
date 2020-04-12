@@ -11,6 +11,9 @@ public class GameplayManager : Singleton<GameplayManager>
     public float lastUpdatedTime;
     float prevUpdatedTime;
 
+    // expected 200ms lag on the network
+    public static float estimatedLag = 0.2f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -45,7 +48,7 @@ public class GameplayManager : Singleton<GameplayManager>
         }
     }
 
-    public void UpdatePlayers( List<PlayerData> playersData )
+    public void UpdatePlayers( List<PlayerData> playersData, List<PlayerCommandData> playersCommands )
     {
         lastUpdatedTime = Time.time;
         // 
@@ -57,7 +60,7 @@ public class GameplayManager : Singleton<GameplayManager>
         {
             if( playerUnits.ContainsKey( playerData.id ) )
             {
-                playerUnits[playerData.id].UpdateTransform( playerData.position, playerData.rotation, 
+                playerUnits[playerData.id].UpdatePlayerData( playerData, 
                     playerData.id == PlayerController.Instance.localPlayerId );
             }
             else
@@ -65,6 +68,14 @@ public class GameplayManager : Singleton<GameplayManager>
                 SpawnPlayer( playerData, false );
             }
             playerUnits[playerData.id].IsLatestDataReceived = true;
+        }
+        foreach( var commandData in playersCommands )
+        {
+            if( playerUnits.ContainsKey( commandData.playerId ) )
+            {
+                playerUnits[commandData.playerId].AddCommand( commandData.command );
+                playerUnits[commandData.playerId].IsLatestDataReceived = true;
+            }
         }
         foreach( var kv in playerUnits )
         {

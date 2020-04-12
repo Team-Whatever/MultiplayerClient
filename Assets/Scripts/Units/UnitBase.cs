@@ -95,8 +95,6 @@ public class UnitBase : StateMachine
     /// </summary>
     // messages received from the server
     Queue<PlayerCommand> commandQueue = new Queue<PlayerCommand>();
-    // returns true if any of player info is changed
-    public bool IsDirtyFlag { get; private set; }
     // checks if the unit data is up to dated
     public bool IsLatestDataReceived { get; set; }
     PlayerData playerInfo;
@@ -294,36 +292,42 @@ public class UnitBase : StateMachine
             Camera.main.transform.localPosition = Vector3.zero;
             Camera.main.transform.localRotation = Quaternion.identity;
         }
-
-        IsDirtyFlag = true;
     }
 
+    public void ValidatePlayerData()
+    {
+        playerInfo.position = transform.position;
+        playerInfo.rotation = transform.rotation;
+    }
 
     public PlayerData GetPlayerData()
     {
         return playerInfo;
     }
 
-    public void UpdatePlayerData()
+    public void UpdatePlayerData( PlayerData data, bool isLocalPlayer )
     {
-        playerInfo.position = transform.position;
-        playerInfo.rotation = transform.rotation;
-        playerInfo.lastUpdateTime = Time.time;
-    }
+        bool isDead = false;
+        if( IsAlive && data.health <= 0.0f )
+        {
+            isDead = true;
+        }
 
-    public void UpdateTransform( Vector3 position, Quaternion rotation, bool isLocalPlayer )
-    {
-        if( isLocalPlayer )
+        playerInfo = data;
+        if( !isLocalPlayer )
         {
-            transform.position = position;
-            transform.rotation = rotation;
-            UpdatePlayerData();
+            targetPosition = data.position;
+            targetRotation = data.rotation;
         }
-        else
+        playerInfo.lastUpdateTime = Time.time;
+
+        //foreach( data. )
+
+        if( isDead )
         {
-            targetPosition = position;
-            targetRotation = rotation;
+            Die();
         }
+
     }
 
     void SetModel( int unitId )
@@ -409,12 +413,15 @@ public class UnitBase : StateMachine
 
     public virtual void TakeDamage(float damage)
     {
-        CurrentHealth = Mathf.Max( CurrentHealth - damage, 0.0f );
-        if( CurrentHealth <= 0 )
-            Die();
-        else
+        if( IsAlive )
         {
-            unitUI.SetHealthBarProgress(HealthRate);
+            CurrentHealth = Mathf.Max( CurrentHealth - damage, 0.0f );
+            if( CurrentHealth <= 0 )
+                Die();
+            else
+            {
+                unitUI.SetHealthBarProgress( HealthRate );
+            }
         }
     }
 
@@ -427,12 +434,13 @@ public class UnitBase : StateMachine
 
     public virtual void SetHealth(float health)
     {
-        bool dead = false;
+        bool isDead = false;
         if( health <= 0.0f && CurrentHealth > 0.0f )
-            dead = true;
+            isDead = true;
+
         CurrentHealth = Mathf.Min( maxHealth, health );
 
-        if( dead )
+        if( isDead )
             Die();
         else
             unitUI.SetHealthBarProgress( HealthRate );
