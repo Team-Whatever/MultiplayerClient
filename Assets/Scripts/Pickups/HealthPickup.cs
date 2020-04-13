@@ -4,15 +4,25 @@ using UnityEngine;
 
 public class HealthPickup : MonoBehaviour
 {
-    [SerializeField] int healthAmount = 5;
-    [SerializeField] int respawnTimer = 10;
+    [SerializeField] float healthAmount = 5;
+    [SerializeField] float respawnTimer = 10;
 
     private void OnTriggerEnter(Collider collider)
     {
         if (collider.gameObject.tag == "Player")
         {
-            //FindObjectOfType<PlayerHealth>().ReceiveHealth(healthAmount);
-            //StartCoroutine(RespawnTimer());
+            UnitBase targetUnit = collider.GetComponent<UnitBase>();
+            if( targetUnit == null )
+                return;
+
+            if( !targetUnit.IsMaxHealth )
+            {
+                if( UnitBase.IsRunOnServer )
+                {
+                    targetUnit.Heal( healthAmount );
+                }
+                StartCoroutine( RespawnTimer() );
+            }
         }
     }
 

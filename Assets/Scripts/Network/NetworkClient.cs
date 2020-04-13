@@ -140,7 +140,7 @@ public class NetworkClient : MonoBehaviour
         if( localPlayer )
         {
             // send data at least once in two seconds
-            if( PlayerController.Instance.HasCommand() || Time.time - lastTimestamp > 2.0 )
+            if( PlayerController.Instance.HasCommand() || Time.time - lastTimestamp > 0.1 )
             {
                 localPlayer.ValidatePlayerData();
                 PlayerUpdateMsg puMsg = new PlayerUpdateMsg( clientId, localPlayer.GetPlayerData(), PlayerController.Instance.PopCommands() );

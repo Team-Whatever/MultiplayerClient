@@ -123,6 +123,10 @@ public class UnitBase : StateMachine
     {
         get { return CurrentHealth > 0.0f; }
     }
+    public bool IsMaxHealth
+    {
+        get { return CurrentHealth == maxHealth; }
+    }
     public EventUnitKilled UnitKilled;
 
     /// <summary>

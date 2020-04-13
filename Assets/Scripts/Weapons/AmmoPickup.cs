@@ -12,8 +12,20 @@ public class AmmoPickup : MonoBehaviour
     {
         if (collider.gameObject.tag == "Player")
         {
-            FindObjectOfType<Ammo>().IncreaseCurrentAmmo(ammoType, ammoAmount);
-            StartCoroutine(RespawnTimer());
+            UnitBase targetUnit = collider.GetComponent<UnitBase>();
+            if( targetUnit == null )
+                return;
+
+            // TODO : to be implemented
+            //if( !targetUnit.IsMaxAmmo )
+            {
+                if( UnitBase.IsRunOnServer )
+                {
+                    // TODO : to be implemented
+                    // targetUnit.IncreaseCurrentAmmo( ammoType, ammoAmount );
+                }
+                StartCoroutine( RespawnTimer() );
+            }
         }
     }
 
