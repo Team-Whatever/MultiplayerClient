@@ -44,6 +44,9 @@ public enum WeaponType
 
 public class UnitBase : StateMachine
 {
+    // returns true when a unit is spawned on the server
+    public static bool IsRunOnServer;
+
     /// <summary>
     /// Prefabs & children
     /// </summary>
@@ -307,27 +310,14 @@ public class UnitBase : StateMachine
 
     public void UpdatePlayerData( PlayerData data, bool isLocalPlayer )
     {
-        bool isDead = false;
-        if( IsAlive && data.health <= 0.0f )
-        {
-            isDead = true;
-        }
-
         playerInfo = data;
         if( !isLocalPlayer )
         {
             targetPosition = data.position;
             targetRotation = data.rotation;
         }
+        SetHealth( data.health );
         playerInfo.lastUpdateTime = Time.time;
-
-        //foreach( data. )
-
-        if( isDead )
-        {
-            Die();
-        }
-
     }
 
     void SetModel( int unitId )

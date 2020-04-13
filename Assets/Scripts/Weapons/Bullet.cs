@@ -17,14 +17,10 @@ public class Bullet : MonoBehaviour
             if( targetUnit == null )
                 return;
 
-            // HACK : until we get server-side physics
-            // each client determines the damage it self
-            if( !targetUnit.IsLocalPlayer )
-                return;
-
             if( targetUnit != null && teamId != targetUnit.TeamId )
             {
-                targetUnit.TakeDamage( damage );
+                if( UnitBase.IsRunOnServer )
+                    targetUnit.TakeDamage( damage );
 
                 // TODO : change this to OnCollisionEnter to know what's the contact point
                 // turn off trigger event and and rigid body

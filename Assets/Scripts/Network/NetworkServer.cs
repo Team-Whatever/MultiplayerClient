@@ -27,6 +27,8 @@ public class NetworkServer : MonoBehaviour
 
         m_Connections = new NativeList<NetworkConnection>( 16, Allocator.Persistent );
         m_ClientIds = new Dictionary<NetworkConnection, string>();
+
+        UnitBase.IsRunOnServer = true;
     }
     void SendToClient( string message, NetworkConnection c )
     {
