@@ -38,7 +38,9 @@ public class GameServerManager : Singleton<GameServerManager>
         {
             PlayerData newPlayerData = PlayerUnitManager.Instance.NewPlayer( clientId );
             UnitBase player = Instantiate( PlayerUnitManager.Instance.playerPrefab );
-            newPlayerData.position = GetRandomSpawnPoint();
+            Transform startingPoint = GetRandomSpawnPoint();
+            newPlayerData.position = startingPoint.position;
+            newPlayerData.rotation = startingPoint.rotation;
             Debug.LogWarning( clientId + " player spawned at : " + newPlayerData.position.ToString() );
             player.SetPlayerData( newPlayerData, false );
 
@@ -94,10 +96,30 @@ public class GameServerManager : Singleton<GameServerManager>
         }
     }
 
-    Vector3 GetRandomSpawnPoint()
+    Transform GetRandomSpawnPoint()
     {
         nextStartingPointIndex = ( nextStartingPointIndex + 1 ) % startingPoints.Count;
-        return startingPoints[nextStartingPointIndex].transform.position;
+        return startingPoints[nextStartingPointIndex].transform;
+    }
+
+    public void RemovePlayer( string clientId )
+    {
+        for( int i = 0; i < playersData.Count; i++ )
+        {
+            if( playersData[i].id == clientId )
+            {
+                playersData.RemoveAt( i );
+                break;
+            }
+        }
+        if( playersDataDict.ContainsKey( clientId ) )
+            playersDataDict.Remove( clientId );
+
+        if( playerUnits.ContainsKey( clientId ) )
+        {
+            Destroy( playerUnits[clientId].gameObject );
+            playerUnits.Remove( clientId );
+        }
     }
 
 }

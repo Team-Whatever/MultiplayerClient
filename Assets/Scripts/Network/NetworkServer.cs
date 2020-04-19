@@ -155,7 +155,8 @@ public class NetworkServer : MonoBehaviour
             for( int i = 0; i < m_Connections.Length; i++ )
             {
                 ServerUpdateMsg m = new ServerUpdateMsg( GameServerManager.Instance.playersData, GameServerManager.Instance.playersCommands );
-                SendToClient( JsonUtility.ToJson( m ), m_Connections[i] );
+                if( m_Connections[i].IsCreated )
+                    SendToClient( JsonUtility.ToJson( m ), m_Connections[i] );
                 GameServerManager.Instance.playersCommands.Clear();
             }
             GameServerManager.Instance.HasClientChanged = false;
@@ -169,6 +170,7 @@ public class NetworkServer : MonoBehaviour
         {
             string clientId = m_ClientIds[c];
             m_ClientIds.Remove( c );
+            GameServerManager.Instance.RemovePlayer( clientId );
         }
         else
         {
