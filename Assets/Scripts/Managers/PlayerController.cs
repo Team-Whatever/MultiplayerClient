@@ -16,6 +16,7 @@ public enum PlayerCommand
     LookUp,
     LookDown,
     FireBullet,
+    Respawn,
 };
 
 [System.Serializable]
@@ -148,7 +149,7 @@ public class PlayerController : Singleton<PlayerController>
 
     public void OnDead()
     {
-        CanvasManager.Instance.ShowDeadUI();
+        HUD.Instance.ShowDeathPopup();
     }
 
     public void RevivePlayer()

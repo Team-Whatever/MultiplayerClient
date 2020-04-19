@@ -317,6 +317,10 @@ public class UnitBase : StateMachine
 
     public void UpdatePlayerData( PlayerData data, bool isLocalPlayer )
     {
+        // SetHealth should be called before assing player data
+        // to check if the player just died
+        SetHealth( data.health );
+
         playerInfo = data;
         if( !isLocalPlayer )
         {
@@ -327,7 +331,7 @@ public class UnitBase : StateMachine
             eulerAngles.x = data.verticalRotation;
             cameraSpot.transform.rotation = Quaternion.Euler( eulerAngles );
         }
-        SetHealth( data.health );
+        
         playerInfo.lastUpdateTime = Time.time;
     }
 
@@ -418,10 +422,10 @@ public class UnitBase : StateMachine
 
     public void Die()
     {
-        gameObject.SetActive(false);
         if( IsLocalPlayer )
             PlayerController.Instance.OnDead();
-        //UnitKilled.Invoke(this);
+        else
+            gameObject.SetActive( false );
     }
 
     public virtual void TakeDamage(float damage)

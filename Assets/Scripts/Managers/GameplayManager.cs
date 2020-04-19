@@ -17,7 +17,7 @@ public class GameplayManager : Singleton<GameplayManager>
     // Start is called before the first frame update
     void Start()
     {
-        
+        Cursor.visible = false;
     }
 
     // Update is called once per frame
@@ -45,6 +45,7 @@ public class GameplayManager : Singleton<GameplayManager>
             {
                 PlayerController.Instance.localPlayer = player;
                 PlayerController.Instance.localPlayerId = playerInfo.id;
+                HUD.Instance.SetPlayer( player );
             }
         }
     }
