@@ -264,7 +264,8 @@ public class UnitBase : StateMachine
         switch( command )
         {
             case PlayerCommand.FireBullet:
-                FireBullet();
+                if( !IsLocalPlayer )
+                    FireBullet();
                 break;
             default:
                 break;
@@ -274,6 +275,7 @@ public class UnitBase : StateMachine
     public void FireBullet()
     {
         ChangeState( UnitState.Attack );
+        currentWeapon.OnFire();
     }
 
 
@@ -461,7 +463,7 @@ public class UnitBase : StateMachine
 
     public void OnBeginAttack()
     {
-        currentWeapon.OnBeginAttack();
+        //currentWeapon.OnBeginAttack();
     }
 
     public void OnFire( )
@@ -471,7 +473,7 @@ public class UnitBase : StateMachine
 
     public void OnEndAttack()
     {
-        currentWeapon.OnEndAttack();
+        //currentWeapon.OnEndAttack();
         ChangeState( UnitState.Idle );
     }
 

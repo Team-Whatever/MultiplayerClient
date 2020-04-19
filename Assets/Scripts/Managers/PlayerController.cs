@@ -110,11 +110,11 @@ public class PlayerController : Singleton<PlayerController>
         {
             unit.Rotate( horizontalRotation );
         }
-        if( verticalRotation != 0.0f )
-        {
-            // plus : goes up, but x-angle goes negative
-            unit.LookUp( -verticalRotation );
-        }
+        //if( verticalRotation != 0.0f )
+        //{
+        //    // plus : goes up, but x-angle goes negative
+        //    unit.LookUp( -verticalRotation );
+        //}
     }
 
     IEnumerator AsyncFireBullet( UnitBase unit, float lagTime )

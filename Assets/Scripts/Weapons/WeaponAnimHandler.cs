@@ -14,13 +14,13 @@ public class WeaponAnimHandler : MonoBehaviour
     public void BeginAttack()
 	{
         //DebugExtension.LogLevel( owner.ToString() + " : BeginAttack", DebugExtension.LogType.Gameplay );
-        owner.OnBeginAttack();
+        //owner.OnBeginAttack();
 	}
 
     public void Fire()
     {
         //DebugExtension.LogLevel( owner.ToString() + " : Hit", DebugExtension.LogType.Gameplay );
-        owner.OnFire();
+        //owner.OnFire();
     }
 
     public void EndAttack()
