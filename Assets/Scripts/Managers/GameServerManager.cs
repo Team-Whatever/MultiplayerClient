@@ -52,6 +52,19 @@ public class GameServerManager : Singleton<GameServerManager>
         }
     }
 
+    void RespawnPlayer( string clientId )
+    {
+        if( playersDataDict.ContainsKey( clientId ) )
+        {
+            playerUnits[clientId].Reset();
+            playersDataDict[clientId].health = PlayerUnitManager.MaxHealth;
+
+            Transform startingPoint = GetRandomSpawnPoint();
+            playersDataDict[clientId].position = startingPoint.position;
+            playersDataDict[clientId].rotation = startingPoint.rotation;
+        }
+    }
+
     public void UpdatePlayerCommands( PlayerData playerData, List<PlayerCommandData> commands )
     {
         lastUpdatedTime = Time.time;
@@ -92,6 +105,9 @@ public class GameServerManager : Singleton<GameServerManager>
             case PlayerCommand.FireBullet:
                 unit.FireBullet();
                 playersCommands.Add( cmd );
+                break;
+            case PlayerCommand.Respawn:
+                RespawnPlayer( unit.PlayerId );
                 break;
             default:
                 Debug.Assert( false, "TODO: Missing command : " + cmd.command.ToString() );

@@ -460,7 +460,10 @@ public class UnitBase : StateMachine
         if( isDead )
             Die();
         else
+        {
+            gameObject.SetActive( true );
             unitUI.SetHealthBarProgress( HealthRate );
+        }
     }
 
     #region Weapon functions

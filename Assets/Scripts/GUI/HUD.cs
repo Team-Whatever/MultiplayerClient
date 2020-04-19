@@ -49,6 +49,6 @@ public class HUD : Singleton<HUD>
     {
         deathPopup.SetActive( false );
         Cursor.visible = false;
-        //PlayerController.Instance.AddCommand( PlayerCommand.Respawn );
+        PlayerController.Instance.AddCommand( PlayerCommand.Respawn );
     }
 }
