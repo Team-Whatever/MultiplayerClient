@@ -372,7 +372,7 @@ public class UnitBase : StateMachine
         }
         else
         {
-            transform.Translate( direction * moveSpeed );
+            transform.Translate( direction * Time.fixedDeltaTime );
         }
     }
 

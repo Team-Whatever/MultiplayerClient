@@ -576,7 +576,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7744cf9d9d9d8f4dbafe3bb334bbdae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverIP: 127.0.0.1
+  serverIP: 192.168.2.18
   serverPort: 12346
   clientId: 
 --- !u!4 &1137193549
@@ -1323,11 +1323,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 5763302354325267177, guid: b2a72147ccd5b8945b59d561b916b1b1,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6920004562967913566, guid: b2a72147ccd5b8945b59d561b916b1b1,
         type: 3}
       propertyPath: m_LocalPosition.x
