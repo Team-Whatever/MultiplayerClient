@@ -96,9 +96,9 @@ public class GameplayManager : Singleton<GameplayManager>
     {
         if( PlayerController.Instance.localPlayerId != clientId && playerUnits.ContainsKey( clientId ) )
         {
+            Destroy( playerUnits[clientId].gameObject );
             playersData.Remove( playerUnits[clientId].GetPlayerData() );
             playerUnits.Remove( clientId );
-            Destroy( playerUnits[clientId].gameObject );
         }
     }
 

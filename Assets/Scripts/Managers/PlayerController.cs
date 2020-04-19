@@ -97,7 +97,7 @@ public class PlayerController : Singleton<PlayerController>
             }
             StartCoroutine( ASyncUpdateTransform( localPlayer, moveVector, rotationValue, GameplayManager.estimatedLag ) );
 
-            if( Input.GetKeyDown( KeyCode.Space ) )
+            if( Input.GetMouseButton( 0 ) || Input.GetKeyDown( KeyCode.Space ) )
             {
                 if( localPlayer.CanAttack() )
                 {
