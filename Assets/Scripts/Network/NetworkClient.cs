@@ -26,7 +26,7 @@ public class NetworkClient : MonoBehaviour
 
     void SendToServer( string message )
     {
-        Debug.Log( "[Client] Send message to server : " + message );
+        //Debug.Log( "[Client] Send message to server : " + message );
         var writer = m_Driver.BeginSend( m_Connection );
         NativeArray<byte> bytes = new NativeArray<byte>( Encoding.ASCII.GetBytes( message ), Allocator.Temp );
         writer.WriteBytes( bytes );
@@ -75,7 +75,7 @@ public class NetworkClient : MonoBehaviour
                 break;
             case Commands.SERVER_UPDATE:
                 ServerUpdateMsg suMsg = JsonUtility.FromJson<ServerUpdateMsg>( recMsg );
-                Debug.Log( "[Client] Server update message received!" + suMsg.players.ToArrayString() );
+                //Debug.Log( "[Client] Server update message received!" + suMsg.players.ToArrayString() );
                 GameplayManager.Instance.UpdatePlayers( suMsg.players, suMsg.playerCommands );
                 break;
             default:

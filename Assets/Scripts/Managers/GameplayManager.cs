@@ -36,6 +36,7 @@ public class GameplayManager : Singleton<GameplayManager>
         {
             UnitBase player = Instantiate( PlayerUnitManager.Instance.playerPrefab );
             player.SetPlayerData( playerInfo, isLocalPlayer );
+            Debug.LogWarning( playerInfo.id + " player spawned at : " + playerInfo.position.ToString() );
 
             playersData.Add( playerInfo );
             playerUnits.Add( playerInfo.id, player );

@@ -337,13 +337,13 @@ public class UnitBase : StateMachine
     #region Nav Mesh Agent
     public void StartNavigation()
     {
-        if( agent )
+        if( agent && agent.isActiveAndEnabled )
             agent.isStopped = false;
     }
 
     public void StopMove()
     {
-        if( agent )
+        if( agent && agent.isActiveAndEnabled )
         {
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
@@ -352,7 +352,7 @@ public class UnitBase : StateMachine
 
     public void MoveTo( Vector3 position )
     {
-        if( agent )
+        if( agent && agent.isActiveAndEnabled )
         {
             agent.SetDestination( position );
             if( agent.isStopped == true )
@@ -362,13 +362,17 @@ public class UnitBase : StateMachine
 
     public void MoveBy( Vector3 direction )
     {
-        if( agent )
+        if( agent && agent.isActiveAndEnabled )
         {
             //Debug.Log( string.Format( "Move by {0}", direction.ToString() ) );
             agent.velocity = direction * moveSpeed;
 
             if( agent.isStopped == true )
                 ChangeState( UnitState.Move );
+        }
+        else
+        {
+            transform.Translate( direction * moveSpeed );
         }
     }
 

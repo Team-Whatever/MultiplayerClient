@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameServerManager : Singleton<GameServerManager>
@@ -12,10 +13,19 @@ public class GameServerManager : Singleton<GameServerManager>
     Dictionary<string, PlayerData> prevPlayerData = new Dictionary<string, PlayerData>();
     Dictionary<string, UnitBase> playerUnits = new Dictionary<string, UnitBase>();
 
+    List<GameObject> startingPoints;
+    int nextStartingPointIndex;
+
     [HideInInspector]
     public float lastUpdatedTime;
     float prevUpdatedTime;
     public bool HasClientChanged { get; set; }
+
+    private void Awake()
+    {
+        startingPoints = GameObject.FindGameObjectsWithTag( "StartPoint" ).OrderBy( x => Random.value ).ToList();
+        nextStartingPointIndex = 0;
+    }
 
     public PlayerData SpawnPlayer( string clientId )
     {
@@ -28,6 +38,8 @@ public class GameServerManager : Singleton<GameServerManager>
         {
             PlayerData newPlayerData = PlayerUnitManager.Instance.NewPlayer( clientId );
             UnitBase player = Instantiate( PlayerUnitManager.Instance.playerPrefab );
+            newPlayerData.position = GetRandomSpawnPoint();
+            Debug.LogWarning( clientId + " player spawned at : " + newPlayerData.position.ToString() );
             player.SetPlayerData( newPlayerData, false );
 
             playersData.Add( newPlayerData );
@@ -80,6 +92,12 @@ public class GameServerManager : Singleton<GameServerManager>
                 Debug.Assert( false, "TODO: Missing command : " + cmd.command.ToString() );
                 break;
         }
+    }
+
+    Vector3 GetRandomSpawnPoint()
+    {
+        nextStartingPointIndex = ( nextStartingPointIndex + 1 ) % startingPoints.Count;
+        return startingPoints[nextStartingPointIndex].transform.position;
     }
 
 }
