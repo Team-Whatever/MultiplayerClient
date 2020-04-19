@@ -10,6 +10,7 @@ public class PlayerData
 
     public Vector3 position;
     public Quaternion rotation;
+    public float verticalRotation;
 
     public float health;
     public float lastUpdateTime;

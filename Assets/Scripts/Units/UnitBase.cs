@@ -305,6 +305,7 @@ public class UnitBase : StateMachine
     {
         playerInfo.position = transform.position;
         playerInfo.rotation = transform.rotation;
+        playerInfo.verticalRotation = cameraSpot.transform.localEulerAngles.x;
     }
 
     public PlayerData GetPlayerData()
@@ -319,6 +320,10 @@ public class UnitBase : StateMachine
         {
             targetPosition = data.position;
             targetRotation = data.rotation;
+
+            Vector3 eulerAngles = cameraSpot.transform.eulerAngles;
+            eulerAngles.x = data.verticalRotation;
+            cameraSpot.transform.rotation = Quaternion.Euler( eulerAngles );
         }
         SetHealth( data.health );
         playerInfo.lastUpdateTime = Time.time;
@@ -379,6 +384,14 @@ public class UnitBase : StateMachine
     public void Rotate( float angle )
     {
         transform.Rotate( Vector3.up, angle * angularSpeed );
+    }
+
+    public void LookUp( float verticalRotation )
+    {
+        //Debug.Log( "vertical = " + verticalRotation.ToString() );
+        Vector3 eulerAngles = cameraSpot.transform.eulerAngles;
+        eulerAngles.x = Mathf.Clamp( eulerAngles.x + verticalRotation * angularSpeed, -30.0f, 30.0f );
+        cameraSpot.transform.rotation = Quaternion.Euler( eulerAngles );
     }
 
     public bool IsReachedTarget()
