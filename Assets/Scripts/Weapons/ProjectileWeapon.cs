@@ -39,7 +39,7 @@ public class ProjectileWeapon : WeaponBase
 
     void FireBullet()
     {
-        Bullet bullet = Instantiate( bulletPrefab, bulletSpawnPoint.position, owner.transform.rotation );
+        Bullet bullet = Instantiate( bulletPrefab, bulletSpawnPoint.position, owner.cameraSpot.transform.rotation );
         float damage = attackDamage * damageMultiplier + Random.Range( -damageSpread, damageSpread );
         bullet.Fire( owner.TeamId, damage, bulletSpeed, criticalChance * criticalMultiplier );
 

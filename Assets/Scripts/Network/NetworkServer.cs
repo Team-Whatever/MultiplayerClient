@@ -32,10 +32,13 @@ public class NetworkServer : MonoBehaviour
     }
     void SendToClient( string message, NetworkConnection c )
     {
-        var writer = m_Driver.BeginSend( NetworkPipeline.Null, c );
-        NativeArray<byte> bytes = new NativeArray<byte>( Encoding.ASCII.GetBytes( message ), Allocator.Temp );
-        writer.WriteBytes( bytes );
-        m_Driver.EndSend( writer );
+        if( c.IsCreated )
+        {
+            var writer = m_Driver.BeginSend( NetworkPipeline.Null, c );
+            NativeArray<byte> bytes = new NativeArray<byte>( Encoding.ASCII.GetBytes( message ), Allocator.Temp );
+            writer.WriteBytes( bytes );
+            m_Driver.EndSend( writer );
+        }
     }
 
     public void OnDestroy()

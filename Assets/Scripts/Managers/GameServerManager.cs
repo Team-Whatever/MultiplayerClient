@@ -62,6 +62,9 @@ public class GameServerManager : Singleton<GameServerManager>
                 Debug.Log( "position needs to be updated" );
             playerUnits[playerData.id].transform.position = playerData.position;
             playerUnits[playerData.id].transform.rotation = playerData.rotation;
+            Vector3 angles = playerUnits[playerData.id].cameraSpot.transform.eulerAngles;
+            angles.x = playerData.verticalRotation;
+            playerUnits[playerData.id].cameraSpot.transform.rotation = Quaternion.Euler( angles );
             playersDataDict[playerData.id].position = playerData.position;
             playersDataDict[playerData.id].rotation = playerData.rotation;
             foreach( var command in commands )

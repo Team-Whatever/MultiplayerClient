@@ -79,23 +79,9 @@ public class PlayerController : Singleton<PlayerController>
             }
 
             // mouse right drag
-            float rotationValue = 0.0f;
-            if( Input.GetMouseButton( 1 ) )
-            {
-                rotationValue = Input.GetAxis( "Mouse X" );
-            }
-            else
-            {
-                if( Input.GetKey( KeyCode.Q ) )
-                {
-                    rotationValue += -Time.fixedDeltaTime;
-                }
-                else if( Input.GetKey( KeyCode.E ) )
-                {
-                    rotationValue += Time.fixedDeltaTime;
-                }
-            }
-            StartCoroutine( ASyncUpdateTransform( localPlayer, moveVector, rotationValue, GameplayManager.estimatedLag ) );
+            float rotationValue = Input.GetAxis( "Mouse X" );
+            float verticalValue = Input.GetAxis( "Mouse Y" );
+            StartCoroutine( ASyncUpdateTransform( localPlayer, moveVector, rotationValue, verticalValue, GameplayManager.estimatedLag ) );
 
             if( Input.GetMouseButton( 0 ) || Input.GetKeyDown( KeyCode.Space ) )
             {
@@ -108,7 +94,7 @@ public class PlayerController : Singleton<PlayerController>
         }
     }
 
-    IEnumerator ASyncUpdateTransform( UnitBase unit, Vector3 moveVector, float rotation, float waitingTime )
+    IEnumerator ASyncUpdateTransform( UnitBase unit, Vector3 moveVector, float horizontalRotation, float verticalRotation, float waitingTime )
     {
         yield return new WaitForSeconds( waitingTime );
         if( moveVector != Vector3.zero )
@@ -120,9 +106,14 @@ public class PlayerController : Singleton<PlayerController>
             unit.StopMove();
         }
 
-        if( rotation != 0.0f )
+        if( horizontalRotation != 0.0f )
         {
-            unit.Rotate( rotation );
+            unit.Rotate( horizontalRotation );
+        }
+        if( verticalRotation != 0.0f )
+        {
+            // plus : goes up, but x-angle goes negative
+            unit.LookUp( -verticalRotation );
         }
     }
 
