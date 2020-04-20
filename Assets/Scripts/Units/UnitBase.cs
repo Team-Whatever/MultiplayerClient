@@ -236,7 +236,7 @@ public class UnitBase : StateMachine
             }
             if( targetRotation.HasValue )
             {
-                transform.rotation = Quaternion.Lerp( transform.rotation, targetRotation.Value, timeElapsed );
+                transform.rotation = targetRotation.Value;
             }
 
             if( unitUI )
