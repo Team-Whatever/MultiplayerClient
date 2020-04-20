@@ -1432,7 +1432,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7744cf9d9d9d8f4dbafe3bb334bbdae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverIP: 192.168.2.18
+  serverIP: 3.219.69.41
   serverPort: 12346
   clientId: 
 --- !u!4 &1137193549

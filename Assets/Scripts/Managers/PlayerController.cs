@@ -151,12 +151,4 @@ public class PlayerController : Singleton<PlayerController>
     {
         HUD.Instance.ShowDeathPopup();
     }
-
-    public void RevivePlayer()
-    {
-        localPlayer.Reset();
-
-        // TODO : find player respawning point
-        //localPlayer.transform.position = playerSpawner.transform.position;
-    }
 }
