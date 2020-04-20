@@ -228,7 +228,11 @@ public class UnitBase : StateMachine
             float timeElapsed = Mathf.Clamp( Time.time - GameplayManager.Instance.lastUpdatedTime, 0.0f, 1.0f );
             if( targetPosition.HasValue )
             {
-                transform.position = Vector3.Lerp( transform.position, targetPosition.Value, timeElapsed );
+                Vector3 target = Vector3.Lerp( transform.position, targetPosition.Value, timeElapsed );
+                if( ( target - transform.position ).sqrMagnitude >= 0.1f )
+                    MoveTo( target );
+                else
+                    StopMove();
             }
             if( targetRotation.HasValue )
             {
@@ -388,6 +392,11 @@ public class UnitBase : StateMachine
             agent.SetDestination( position );
             if( agent.isStopped == true )
                 ChangeState( UnitState.Move );
+        }
+        else
+        {
+            ChangeState( UnitState.Move );
+            transform.position = position;
         }
     }
 
