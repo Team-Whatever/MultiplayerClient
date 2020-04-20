@@ -236,7 +236,8 @@ public class UnitBase : StateMachine
             }
             if( targetRotation.HasValue )
             {
-                transform.rotation = targetRotation.Value;
+                if( Quaternion.Angle( targetRotation.Value, transform.rotation ) >= 0.1f )
+                    transform.rotation = targetRotation.Value;
             }
 
             if( unitUI )

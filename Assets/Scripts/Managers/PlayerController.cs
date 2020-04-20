@@ -107,7 +107,7 @@ public class PlayerController : Singleton<PlayerController>
             unit.StopMove();
         }
 
-        if( horizontalRotation != 0.0f )
+        if( Mathf.Abs(horizontalRotation) > 0.1f )
         {
             unit.Rotate( horizontalRotation );
         }
