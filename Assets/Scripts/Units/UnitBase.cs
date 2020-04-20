@@ -172,8 +172,20 @@ public class UnitBase : StateMachine
 
     public void Reset()
     {
+        
+        gameObject.SetActive( true );
         CurrentHealth = maxHealth;
         model.SetActive( true );
+
+        if( playerInfo != null )
+        {
+            transform.position = playerInfo.position;
+            transform.rotation = playerInfo.rotation;
+            targetPosition = null;
+            targetRotation = null;
+        }
+
+        Debug.Log( PlayerId + " Reset at " + transform.position );
 
         currentWeapon.owner = this;
         ChangeState( UnitState.Idle );
@@ -266,6 +278,9 @@ public class UnitBase : StateMachine
             case PlayerCommand.FireBullet:
                 if( !IsLocalPlayer )
                     FireBullet();
+                break;
+            case PlayerCommand.Respawn:
+                Reset();
                 break;
             default:
                 break;

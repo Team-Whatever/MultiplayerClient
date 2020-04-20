@@ -56,12 +56,10 @@ public class GameServerManager : Singleton<GameServerManager>
     {
         if( playersDataDict.ContainsKey( clientId ) )
         {
-            playerUnits[clientId].Reset();
-            playersDataDict[clientId].health = PlayerUnitManager.MaxHealth;
-
             Transform startingPoint = GetRandomSpawnPoint();
             playersDataDict[clientId].position = startingPoint.position;
             playersDataDict[clientId].rotation = startingPoint.rotation;
+            playerUnits[clientId].Reset();
         }
     }
 
