@@ -106,6 +106,7 @@ public class GameServerManager : Singleton<GameServerManager>
                 break;
             case PlayerCommand.Respawn:
                 RespawnPlayer( unit.PlayerId );
+                playersCommands.Add( cmd );
                 break;
             default:
                 Debug.Assert( false, "TODO: Missing command : " + cmd.command.ToString() );
