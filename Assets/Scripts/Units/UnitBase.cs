@@ -229,7 +229,7 @@ public class UnitBase : StateMachine
             if( targetPosition.HasValue )
             {
                 //Vector3 target = Vector3.Lerp( transform.position, targetPosition.Value, timeElapsed );
-                if( ( targetPosition.Value - transform.position ).sqrMagnitude >= 0.005f )
+                if( ( targetPosition.Value - transform.position ).sqrMagnitude >= 0.01f )
                     MoveTo( targetPosition.Value );
                 else
                     StopMove();
