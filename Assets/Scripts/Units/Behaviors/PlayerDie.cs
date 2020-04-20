@@ -17,6 +17,7 @@ public class PlayerDie : BaseState
     public override void Exit()
     {
         owner.animator.SetBool( "Death_b", false );
+        owner.animator.Rebind();
     }
 
     public override string ToString()

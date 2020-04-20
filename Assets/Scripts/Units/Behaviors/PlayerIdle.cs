@@ -5,7 +5,7 @@ public class PlayerIdle : BaseState
 {
     public override void Enter()
     {
-        //ChangeAnimation( AnimState.Idle );
+        owner.animator.SetFloat( "Speed_f", 0.0f );
     }
 
     public override void Execute()
