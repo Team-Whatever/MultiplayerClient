@@ -452,10 +452,10 @@ public class UnitBase : StateMachine
 
     public void Die()
     {
+        ChangeState( UnitState.Die );
+
         if( IsLocalPlayer )
             PlayerController.Instance.OnDead();
-        else
-            gameObject.SetActive( false );
     }
 
     public virtual void TakeDamage(float damage)
@@ -481,15 +481,15 @@ public class UnitBase : StateMachine
 
     public virtual void SetHealth(float health)
     {
-        bool isDead = false;
+        bool justDead = false;
         if( health <= 0.0f && CurrentHealth > 0.0f )
-            isDead = true;
+            justDead = true;
 
         CurrentHealth = Mathf.Min( maxHealth, health );
 
-        if( isDead )
+        if( justDead )
             Die();
-        else
+        else if( IsAlive )
         {
             gameObject.SetActive( true );
             unitUI.SetHealthBarProgress( HealthRate );
