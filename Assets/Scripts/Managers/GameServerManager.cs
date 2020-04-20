@@ -69,8 +69,8 @@ public class GameServerManager : Singleton<GameServerManager>
 
         if( playerUnits.ContainsKey( playerData.id ) )
         {
-            if( playerUnits[playerData.id].transform.position != playerData.position )
-                Debug.Log( "position needs to be updated" );
+            //if( playerUnits[playerData.id].transform.position != playerData.position )
+            //    Debug.Log( "position needs to be updated" );
             playerUnits[playerData.id].transform.position = playerData.position;
             playerUnits[playerData.id].transform.rotation = playerData.rotation;
             Vector3 angles = playerUnits[playerData.id].cameraSpot.transform.eulerAngles;
