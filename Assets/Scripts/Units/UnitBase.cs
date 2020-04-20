@@ -374,6 +374,11 @@ public class UnitBase : StateMachine
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
         }
+        else
+        {
+            if( curState.unitState == UnitState.Move )
+                ChangeState( UnitState.Idle );
+        }
     }
 
     public void MoveTo( Vector3 position )
@@ -398,6 +403,7 @@ public class UnitBase : StateMachine
         }
         else
         {
+            ChangeState( UnitState.Move );
             transform.position += ( direction * moveSpeed * Time.fixedDeltaTime );
         }
     }
