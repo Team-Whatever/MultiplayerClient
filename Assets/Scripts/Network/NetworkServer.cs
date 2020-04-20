@@ -155,13 +155,14 @@ public class NetworkServer : MonoBehaviour
 
         if( GameServerManager.Instance.HasClientChanged || Time.time - lastSentTime > 0.05f )
         {
+            ServerUpdateMsg m = new ServerUpdateMsg( GameServerManager.Instance.playersData, GameServerManager.Instance.playersCommands );
+            string msg = JsonUtility.ToJson( m );
             for( int i = 0; i < m_Connections.Length; i++ )
             {
-                ServerUpdateMsg m = new ServerUpdateMsg( GameServerManager.Instance.playersData, GameServerManager.Instance.playersCommands );
                 if( m_Connections[i].IsCreated )
-                    SendToClient( JsonUtility.ToJson( m ), m_Connections[i] );
-                GameServerManager.Instance.playersCommands.Clear();
+                    SendToClient( msg, m_Connections[i] );
             }
+            GameServerManager.Instance.playersCommands.Clear();
             GameServerManager.Instance.HasClientChanged = false;
             lastSentTime = Time.time;
         }
